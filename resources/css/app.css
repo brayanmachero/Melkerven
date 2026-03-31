@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-sans antialiased bg-primary-950 text-white selection:bg-accent-500 selection:text-white;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-display font-medium tracking-tight text-white;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply bg-primary-900/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+    }
+
+    .tech-card {
+        @apply bg-primary-900 border border-primary-800 rounded-2xl p-6 hover:border-accent-500/50 transition-all duration-500 shadow-lg;
+    }
+
+    .tech-input {
+        @apply block w-full rounded-xl border border-white/10 bg-primary-950 px-4 py-3 text-sm text-white placeholder-primary-600 focus:border-accent-500/50 focus:ring-1 focus:ring-accent-500/30 focus:outline-none transition-all duration-300;
+    }
+
+    .tech-input option {
+        @apply bg-primary-950 text-white;
+    }
+
+    .premium-gradient {
+        @apply bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800;
+    }
+
+    .text-gradient {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-primary-400;
+    }
+
+    .btn-premium {
+        @apply px-8 py-3.5 rounded-xl font-bold transition-all duration-300 active:scale-95 flex items-center justify-center gap-2;
+    }
+}
+
+/* Animation Utilities */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInFromTop {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.animate-in {
+    animation-fill-mode: both;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in-from-bottom-5,
+.slide-in-from-bottom {
+    animation: slideInFromBottom 0.3s ease-out;
+}
+
+.slide-in-from-top-2,
+.slide-in-from-top-4 {
+    animation: slideInFromTop 0.4s ease-out;
+}
+
+.zoom-in {
+    animation: zoomIn 0.3s ease-out;
+}
