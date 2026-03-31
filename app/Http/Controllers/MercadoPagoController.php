@@ -148,7 +148,7 @@ class MercadoPagoController extends Controller
         try {
             $client = new PreferenceClient();
 
-            $preference = $client->create([
+            $preferenceData = [
                 'items' => $mpItems,
                 'back_urls' => [
                     'success' => route('mercadopago.success', ['order' => $order->id]),
@@ -162,7 +162,15 @@ class MercadoPagoController extends Controller
                     'email' => $request->customer_email,
                 ],
                 'statement_descriptor' => 'MELKERVEN',
-            ]);
+            ];
+
+            // Only add auto_return and webhook in production (MercadoPago requires public URLs)
+            if (app()->isProduction()) {
+                $preferenceData['auto_return'] = 'approved';
+                $preferenceData['notification_url'] = route('mercadopago.webhook');
+            }
+
+            $preference = $client->create($preferenceData);
 
             $order->update(['webpay_token' => $preference->id]);
 
