@@ -31,9 +31,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         {/* Logo + Nav */}
                         <div className="flex items-center">
                             <Link href="/" className="flex items-center gap-3 mr-10">
-                                <div className="size-8 bg-accent-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(14,165,233,0.3)]">
-                                    <span className="text-white font-display font-bold text-sm uppercase tracking-tighter">M</span>
-                                </div>
+                                <img src="/images/logo.png" alt="Melkerven" className="h-8 w-auto object-contain" />
                                 <span className="text-white font-display font-medium tracking-tight text-lg">
                                     MELKERVEN<span className="text-accent-500">.</span>
                                     {user.role === 'admin' && <span className="text-accent-500 ml-1 text-xs">ADMIN</span>}

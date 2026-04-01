@@ -43,10 +43,8 @@ export default function PublicLayout({ children, auth }) {
                 <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-20">
                         <div className="flex items-center">
-                            <Link href="/" className="flex items-center space-x-2">
-                                <div className="size-10 bg-accent-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(14,165,233,0.3)]">
-                                    <span className="text-white font-display font-bold text-xl uppercase tracking-tighter">M</span>
-                                </div>
+                            <Link href="/" className="flex items-center space-x-3">
+                                <img src="/images/logo.png" alt="Melkerven" className="h-10 w-auto object-contain" />
                                 <span className="text-2xl font-display font-medium tracking-tighter text-white">
                                     MELKERVEN<span className="text-accent-500">.</span>
                                 </span>
@@ -149,9 +147,7 @@ export default function PublicLayout({ children, auth }) {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
                         <div className="col-span-1 md:col-span-2">
                             <Link href="/" className="flex items-center space-x-2 mb-8">
-                                <div className="size-8 bg-accent-500 rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-display font-bold uppercase tracking-tighter">M</span>
-                                </div>
+                                <img src="/images/logo.png" alt="Melkerven" className="h-8 w-auto object-contain" />
                                 <span className="text-xl font-display font-medium tracking-tighter text-white">
                                     MELKERVEN
                                 </span>
