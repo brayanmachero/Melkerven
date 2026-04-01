@@ -1,4 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
+import Breadcrumbs from '@/Components/Breadcrumbs';
 import { Head, useForm } from '@inertiajs/react';
 
 export default function Contact({ auth }) {
@@ -24,6 +25,7 @@ export default function Contact({ auth }) {
                 <div className="absolute top-0 right-0 size-96 bg-accent-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
 
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                    <Breadcrumbs items={[{ label: 'Contacto' }]} />
                     <div className="grid lg:grid-cols-2 gap-20">
                         {/* Info Column */}
                         <div>

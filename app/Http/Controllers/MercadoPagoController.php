@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Mail\OrderPaid;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use MercadoPago\Client\Preference\PreferenceClient;
 use MercadoPago\MercadoPagoConfig;
@@ -209,21 +210,24 @@ class MercadoPagoController extends Controller
         }
 
         if ($status === 'approved' && $order->status !== 'paid') {
-            $order->update([
-                'status' => 'paid',
-                'payment_id' => $paymentId,
-            ]);
+            DB::transaction(function () use ($order, $paymentId) {
+                $order->lockForUpdate();
+                if ($order->status === 'paid') return;
 
-            // Reduce stock
-            foreach ($order->items as $item) {
-                if ($item->product_id) {
-                    Product::where('id', $item->product_id)
-                        ->where('stock', '>=', $item->quantity)
-                        ->decrement('stock', $item->quantity);
+                $order->update([
+                    'status' => 'paid',
+                    'payment_id' => $paymentId,
+                ]);
+
+                foreach ($order->items as $item) {
+                    if ($item->product_id) {
+                        Product::where('id', $item->product_id)
+                            ->where('stock', '>=', $item->quantity)
+                            ->decrement('stock', $item->quantity);
+                    }
                 }
-            }
+            });
 
-            // Send confirmation email
             try {
                 Mail::to($order->customer_email)->send(new OrderPaid($order));
             } catch (\Exception $e) {
@@ -295,18 +299,23 @@ class MercadoPagoController extends Controller
                 }
 
                 if ($payment->status === 'approved' && $order->status !== 'paid') {
-                    $order->update([
-                        'status' => 'paid',
-                        'payment_id' => (string) $paymentId,
-                    ]);
+                    DB::transaction(function () use ($order, $paymentId) {
+                        $order->lockForUpdate();
+                        if ($order->status === 'paid') return;
 
-                    foreach ($order->items as $item) {
-                        if ($item->product_id) {
-                            Product::where('id', $item->product_id)
-                                ->where('stock', '>=', $item->quantity)
-                                ->decrement('stock', $item->quantity);
+                        $order->update([
+                            'status' => 'paid',
+                            'payment_id' => (string) $paymentId,
+                        ]);
+
+                        foreach ($order->items as $item) {
+                            if ($item->product_id) {
+                                Product::where('id', $item->product_id)
+                                    ->where('stock', '>=', $item->quantity)
+                                    ->decrement('stock', $item->quantity);
+                            }
                         }
-                    }
+                    });
 
                     try {
                         Mail::to($order->customer_email)->send(new OrderPaid($order));

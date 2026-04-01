@@ -1,4 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
+import Breadcrumbs from '@/Components/Breadcrumbs';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -8,7 +9,11 @@ export default function Catalog({ auth, products, categories, filters }) {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(route('catalog'), { category: filters.category, search: searchTerm }, { preserveState: true });
+        router.get(route('catalog'), { ...filters, search: searchTerm }, { preserveState: true });
+    };
+
+    const applyFilter = (newFilters) => {
+        router.get(route('catalog'), { ...filters, ...newFilters }, { preserveState: true, replace: true });
     };
 
     const addToCart = (productId) => {
@@ -30,6 +35,7 @@ export default function Catalog({ auth, products, categories, filters }) {
                 <div className="absolute top-0 right-0 size-96 bg-accent-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
 
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                    <Breadcrumbs items={[{ label: 'Catálogo' }]} />
                     <div className="mb-12">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="h-px w-12 bg-accent-500"></div>
@@ -87,6 +93,44 @@ export default function Catalog({ auth, products, categories, filters }) {
                         </form>
                     </div>
 
+                    {/* Sort & Filter Bar */}
+                    <div className="flex flex-wrap items-center gap-4 mb-10">
+                        <select
+                            value={`${filters.sort || 'created_at'}_${filters.dir || 'desc'}`}
+                            onChange={(e) => {
+                                const [sort, dir] = e.target.value.split('_');
+                                applyFilter({ sort, dir });
+                            }}
+                            className="bg-primary-950 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:border-accent-500 focus:ring-accent-500/20 font-bold uppercase tracking-widest"
+                        >
+                            <option value="created_at_desc">Más Recientes</option>
+                            <option value="price_asc">Precio: Menor a Mayor</option>
+                            <option value="price_desc">Precio: Mayor a Menor</option>
+                            <option value="name_asc">Nombre: A-Z</option>
+                            <option value="name_desc">Nombre: Z-A</option>
+                            <option value="stock_desc">Mayor Stock</option>
+                        </select>
+
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                checked={!!filters.in_stock}
+                                onChange={(e) => applyFilter({ in_stock: e.target.checked ? '1' : '' })}
+                                className="rounded bg-primary-950 border-white/10 text-accent-500 focus:ring-accent-500 size-4"
+                            />
+                            <span className="text-xs text-primary-400 font-bold uppercase tracking-widest group-hover:text-white transition-colors">Solo con Stock</span>
+                        </label>
+
+                        {(filters.search || filters.category || filters.sort || filters.in_stock) && (
+                            <Link
+                                href={route('catalog')}
+                                className="text-[10px] font-bold uppercase tracking-widest text-primary-500 hover:text-accent-500 transition-colors ml-auto"
+                            >
+                                Limpiar Filtros ×
+                            </Link>
+                        )}
+                    </div>
+
                     {/* Products Grid - High contrast Tech Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {products.data.map((product) => (
@@ -99,6 +143,7 @@ export default function Catalog({ auth, products, categories, filters }) {
                                         <img
                                             src={product.image_url}
                                             alt={product.name}
+                                            loading="lazy"
                                             className="size-full object-cover group-hover:scale-110 transition-transform duration-1000 grayscale-[0.3] group-hover:grayscale-0"
                                         />
                                     ) : (

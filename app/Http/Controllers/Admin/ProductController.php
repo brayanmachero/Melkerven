@@ -55,8 +55,14 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|max:2048',
+            'additional_images' => 'nullable|array|max:5',
+            'additional_images.*' => 'image|max:2048',
             'is_active' => 'boolean',
             'is_quotable' => 'boolean',
+            'warranty' => 'nullable|string|max:50',
+            'specifications' => 'nullable|array',
+            'specifications.*.label' => 'required|string|max:100',
+            'specifications.*.value' => 'required|string|max:255',
         ]);
 
         if ($request->hasFile('image')) {
@@ -64,9 +70,20 @@ class ProductController extends Controller
             $validated['image_path'] = $path;
         }
 
+        // Handle additional gallery images
+        if ($request->hasFile('additional_images')) {
+            $imagePaths = [];
+            foreach ($request->file('additional_images') as $img) {
+                $imagePaths[] = $img->store('products', 'public');
+            }
+            $validated['images'] = $imagePaths;
+        }
+
         $validated['slug'] = Str::slug($validated['name']) . '-' . rand(1000, 9999);
 
-        Product::create($validated);
+        $product = Product::create($validated);
+
+        \App\Models\ActivityLog::log('product.created', "Producto creado: {$product->name}", $product);
 
         return redirect()->route('admin.products.index')->with('success', 'Producto creado correctamente.');
     }
@@ -88,12 +105,18 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|max:2048',
+            'additional_images' => 'nullable|array|max:5',
+            'additional_images.*' => 'image|max:2048',
+            'remove_gallery_images' => 'nullable|array',
             'is_active' => 'boolean',
             'is_quotable' => 'boolean',
+            'warranty' => 'nullable|string|max:50',
+            'specifications' => 'nullable|array',
+            'specifications.*.label' => 'required|string|max:100',
+            'specifications.*.value' => 'required|string|max:255',
         ]);
 
         if ($request->hasFile('image')) {
-            // Delete old image
             if ($product->image_path) {
                 Storage::disk('public')->delete($product->image_path);
             }
@@ -101,15 +124,33 @@ class ProductController extends Controller
             $validated['image_path'] = $path;
         }
 
+        // Handle gallery images
+        $existingImages = $product->images ?? [];
+        if ($request->remove_gallery_images) {
+            foreach ($request->remove_gallery_images as $removeImg) {
+                Storage::disk('public')->delete($removeImg);
+                $existingImages = array_values(array_filter($existingImages, fn($i) => $i !== $removeImg));
+            }
+        }
+        if ($request->hasFile('additional_images')) {
+            foreach ($request->file('additional_images') as $img) {
+                $existingImages[] = $img->store('products', 'public');
+            }
+        }
+        $validated['images'] = $existingImages;
+
         $validated['slug'] = Str::slug($validated['name']) . '-' . $product->id;
 
         $product->update($validated);
+
+        \App\Models\ActivityLog::log('product.updated', "Producto actualizado: {$product->name}", $product);
 
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado.');
     }
 
     public function destroy(Product $product)
     {
+        \App\Models\ActivityLog::log('product.deleted', "Producto eliminado: {$product->name}", $product);
         $product->delete();
         return redirect()->back()->with('success', 'Producto eliminado.');
     }

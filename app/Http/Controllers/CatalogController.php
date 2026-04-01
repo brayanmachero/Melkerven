@@ -27,10 +27,29 @@ class CatalogController extends Controller
             });
         }
 
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        if ($request->filled('in_stock')) {
+            $query->where('stock', '>', 0);
+        }
+
+        $sortField = $request->input('sort', 'created_at');
+        $sortDir = $request->input('dir', 'desc');
+        $allowedSorts = ['created_at', 'price', 'name', 'stock'];
+        if (!in_array($sortField, $allowedSorts)) $sortField = 'created_at';
+        if (!in_array($sortDir, ['asc', 'desc'])) $sortDir = 'desc';
+        $query->orderBy($sortField, $sortDir);
+
         return Inertia::render('Catalog', [
-            'products' => $query->latest()->paginate(12)->withQueryString(),
+            'products' => $query->paginate(12)->withQueryString(),
             'categories' => Category::all(),
-            'filters' => $request->only(['category', 'search'])
+            'filters' => $request->only(['category', 'search', 'sort', 'dir', 'min_price', 'max_price', 'in_stock'])
         ]);
     }
 
@@ -40,8 +59,19 @@ class CatalogController extends Controller
             abort(404);
         }
 
+        $relatedProducts = Product::with('category')
+            ->where('is_active', true)
+            ->where('id', '!=', $product->id)
+            ->where(function ($q) use ($product) {
+                $q->where('category_id', $product->category_id);
+            })
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
+
         return Inertia::render('ProductShow', [
-            'product' => $product->load('category')
+            'product' => $product->load('category'),
+            'relatedProducts' => $relatedProducts,
         ]);
     }
 }

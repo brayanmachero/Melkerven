@@ -52,6 +52,8 @@ class OrderController extends Controller
         $oldStatus = $order->status;
         $order->update(['status' => $request->status]);
 
+        \App\Models\ActivityLog::log('order.status_changed', "Pedido #{$order->id} cambió de {$oldStatus} a {$request->status}", $order, ['old' => $oldStatus, 'new' => $request->status]);
+
         if ($oldStatus !== $request->status) {
             try {
                 Mail::to($order->customer_email)->send(new OrderStatusUpdated($order));

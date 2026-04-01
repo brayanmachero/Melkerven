@@ -1,12 +1,21 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Head, Link } from '@inertiajs/react';
+import useScrollAnimation from '@/Hooks/useScrollAnimation';
 
 export default function Home({ auth }) {
+    const hardwareRef = useScrollAnimation();
+    const visionRef = useScrollAnimation();
+    const ctaRef = useScrollAnimation();
+
     return (
         <PublicLayout auth={auth}>
             <Head>
                 <title>Infraestructura TI de Alto Nivel - Melkerven</title>
                 <meta name="description" content="Melkerven Chile: Suministro crítico de hardware, servidores y componentes de TI importados. Potenciamos la continuidad operativa de su empresa con estándares globales." />
+                <meta property="og:title" content="Infraestructura TI de Alto Nivel - Melkerven" />
+                <meta property="og:description" content="Suministro crítico de hardware, servidores y componentes de TI importados. Potenciamos la continuidad operativa de su empresa." />
+                <meta property="og:image" content="/images/logo-light.png" />
+                <meta property="og:type" content="website" />
             </Head>
 
             {/* Hero Section - Impactful V2 */}
@@ -17,6 +26,7 @@ export default function Home({ auth }) {
                         src="/hero_datacenter_tech.png"
                         alt="Melkerven Datacenter"
                         className="size-full object-cover opacity-60 scale-105"
+                        loading="eager"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-primary-950 via-primary-950/90 to-transparent"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-primary-950 via-transparent to-transparent"></div>
@@ -65,7 +75,7 @@ export default function Home({ auth }) {
             </section>
 
             {/* Hardware Impact Section */}
-            <section className="py-20 bg-primary-950 relative overflow-hidden">
+            <section ref={hardwareRef} className="py-20 bg-primary-950 relative overflow-hidden scroll-animate">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8">
                     <div className="grid lg:grid-cols-2 gap-20 items-center">
                         <div className="order-2 lg:order-1 relative">
@@ -74,6 +84,7 @@ export default function Home({ auth }) {
                                     src="/tech_components_impact.png"
                                     alt="Hardware Precision"
                                     className="size-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                                    loading="lazy"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-primary-950/80 to-transparent"></div>
                             </div>
@@ -117,7 +128,7 @@ export default function Home({ auth }) {
             </section>
 
             {/* Vision & History - Dark Industrial V2 */}
-            <section className="py-24 border-y border-white/5 bg-primary-950">
+            <section ref={visionRef} className="py-24 border-y border-white/5 bg-primary-950 scroll-animate">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8">
                     <div className="grid md:grid-cols-2 gap-16">
                         <div className="tech-card">
@@ -147,7 +158,7 @@ export default function Home({ auth }) {
             </section>
 
             {/* High Impact CTA Section */}
-            <section className="py-20 relative overflow-hidden bg-primary-950">
+            <section ref={ctaRef} className="py-20 relative overflow-hidden bg-primary-950 scroll-animate">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8">
                     <div className="relative rounded-[3rem] p-10 sm:p-20 border border-white/10 overflow-hidden group">
                         {/* Background glow */}

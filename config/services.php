@@ -42,4 +42,16 @@ return [
         'sandbox' => env('MERCADOPAGO_SANDBOX', true),
     ],
 
+    // Webpay Plus - Standby hasta obtener credenciales del contrato
+    'webpay' => [
+        'commerce_code' => env('WEBPAY_COMMERCE_CODE'),
+        'api_key' => env('WEBPAY_API_KEY'),
+        'environment' => env('WEBPAY_ENVIRONMENT', 'integration'), // integration | production
+        'enabled' => env('WEBPAY_ENABLED', false),
+    ],
+
+    'google' => [
+        'analytics_id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
 ];

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -8,6 +9,8 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Home');
 })->name('home');
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/catalog', [\App\Http\Controllers\CatalogController::class, 'index'])->name('catalog');
 Route::get('/catalog/{product:slug}', [\App\Http\Controllers\CatalogController::class, 'show'])->name('product.show');
@@ -19,7 +22,15 @@ Route::get('/about', function () {
 Route::get('/contact', function () {
     return Inertia::render('Contact');
 })->name('contact');
-Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.store');
+
+// Newsletter
+Route::post('/newsletter/subscribe', [\App\Http\Controllers\NewsletterController::class, 'subscribe'])->middleware('throttle:5,1')->name('newsletter.subscribe');
+Route::get('/newsletter/unsubscribe/{email}', [\App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
+// Order Tracking (public)
+Route::get('/tracking', [\App\Http\Controllers\OrderTrackingController::class, 'index'])->name('tracking');
+Route::post('/tracking', [\App\Http\Controllers\OrderTrackingController::class, 'track'])->name('tracking.search');
 
 // MercadoPago Payment Routes (guest checkout allowed)
 Route::post('/payment/initiate', [\App\Http\Controllers\MercadoPagoController::class, 'initiate'])->name('payment.initiate');
@@ -32,6 +43,7 @@ Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->nam
 Route::post('/cart/add/{product}', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
 Route::patch('/cart/update', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/remove', [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/coupon', [\App\Http\Controllers\CartController::class, 'applyCoupon'])->name('cart.coupon');
 
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -64,6 +76,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Users (Admin)
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.updateRole');
+
+    // Coupons (Admin)
+    Route::get('/coupons', [\App\Http\Controllers\Admin\CouponController::class, 'index'])->name('coupons.index');
+    Route::post('/coupons', [\App\Http\Controllers\Admin\CouponController::class, 'store'])->name('coupons.store');
+    Route::patch('/coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'update'])->name('coupons.update');
+    Route::delete('/coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'destroy'])->name('coupons.destroy');
 });
 
 // Dashboard - redirects admin to admin dashboard
@@ -101,6 +119,10 @@ Route::middleware('auth')->group(function () {
     // My Quotes
     Route::get('/my-quotes', [\App\Http\Controllers\MyQuoteController::class, 'index'])->name('my-quotes.index');
     Route::post('/my-quotes', [\App\Http\Controllers\MyQuoteController::class, 'store'])->name('my-quotes.store');
+
+    // PDF Downloads
+    Route::get('/pdf/order/{order}', [\App\Http\Controllers\PdfController::class, 'order'])->name('pdf.order');
+    Route::get('/pdf/quote/{quote}', [\App\Http\Controllers\PdfController::class, 'quote'])->name('pdf.quote');
 });
 
 require __DIR__ . '/auth.php';

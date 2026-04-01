@@ -11,7 +11,7 @@ export default function GuestLayout({ children }) {
 
                 <div className="relative z-10 p-20 flex flex-col justify-between h-full">
                     <Link href="/" className="flex items-center space-x-3">
-                        <img src="/images/logo.png" alt="Melkerven" className="h-12 w-auto object-contain" />
+                        <img src="/images/logo-light.png" alt="Melkerven" className="h-12 w-auto object-contain" />
                         <span className="text-3xl font-display font-medium tracking-tighter text-white">
                             MELKERVEN<span className="text-accent-500">.</span>
                         </span>
@@ -44,7 +44,7 @@ export default function GuestLayout({ children }) {
                 <div className="w-full max-w-md relative">
                     <div className="lg:hidden mb-12 flex justify-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <img src="/images/logo.png" alt="Melkerven" className="h-10 w-auto object-contain" />
+                            <img src="/images/logo-light.png" alt="Melkerven" className="h-10 w-auto object-contain" />
                         </Link>
                     </div>
 

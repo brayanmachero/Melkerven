@@ -1,4 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
+import Breadcrumbs from '@/Components/Breadcrumbs';
 import { Head, Link } from '@inertiajs/react';
 
 export default function About({ auth }) {
@@ -10,6 +11,7 @@ export default function About({ auth }) {
                 <div className="absolute top-0 left-0 size-96 bg-accent-500/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
 
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                    <Breadcrumbs items={[{ label: 'Nosotros' }]} />
                     <div className="grid lg:grid-cols-2 gap-20 items-center">
                         <div>
                             <div className="flex items-center gap-3 mb-6">

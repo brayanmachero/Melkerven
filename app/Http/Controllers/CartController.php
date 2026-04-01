@@ -120,4 +120,44 @@ class CartController extends Controller
         }
         return redirect()->back()->with('success', 'Producto removido del carrito.');
     }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate(['code' => 'required|string', 'subtotal' => 'required|numeric']);
+
+        $coupon = \App\Models\Coupon::where('code', strtoupper($request->code))
+            ->where('is_active', true)
+            ->first();
+
+        if (!$coupon) {
+            return response()->json(['valid' => false, 'message' => 'Cupón no encontrado o inactivo.']);
+        }
+
+        if ($coupon->expires_at && $coupon->expires_at->isPast()) {
+            return response()->json(['valid' => false, 'message' => 'Este cupón ha expirado.']);
+        }
+
+        if ($coupon->max_uses && $coupon->used_count >= $coupon->max_uses) {
+            return response()->json(['valid' => false, 'message' => 'Este cupón ha alcanzado su límite de usos.']);
+        }
+
+        if ($coupon->min_amount && $request->subtotal < $coupon->min_amount) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Compra mínima de $' . number_format($coupon->min_amount, 0, ',', '.') . ' requerida.',
+            ]);
+        }
+
+        $discount = $coupon->type === 'percentage'
+            ? round($request->subtotal * ($coupon->value / 100))
+            : min($coupon->value, $request->subtotal);
+
+        return response()->json([
+            'valid' => true,
+            'code' => $coupon->code,
+            'type' => $coupon->type,
+            'value' => $coupon->value,
+            'discount' => $discount,
+        ]);
+    }
 }

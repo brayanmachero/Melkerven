@@ -1,10 +1,18 @@
 import PublicLayout from '@/Layouts/PublicLayout';
+import Breadcrumbs from '@/Components/Breadcrumbs';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function ProductShow({ auth, product }) {
+export default function ProductShow({ auth, product, relatedProducts }) {
     const [quantity, setQuantity] = useState(1);
     const [adding, setAdding] = useState(false);
+    const [activeImage, setActiveImage] = useState(product.image_url);
+
+    // Build gallery: main image + additional images
+    const galleryImages = [
+        product.image_url,
+        ...(product.images || []).map(img => `/storage/${img}`)
+    ].filter(Boolean);
 
     const addToCart = () => {
         setAdding(true);
@@ -18,6 +26,10 @@ export default function ProductShow({ auth, product }) {
             <Head>
                 <title>{`${product.name} - Melkerven Hardware`}</title>
                 <meta name="description" content={product.description ? product.description.substring(0, 150) + '...' : 'Componente de hardware TI de grado industrial.'} />
+                <meta property="og:title" content={`${product.name} - Melkerven`} />
+                <meta property="og:description" content={product.description ? product.description.substring(0, 150) : 'Hardware TI de grado industrial.'} />
+                {product.image_url && <meta property="og:image" content={product.image_url} />}
+                <meta property="og:type" content="product" />
             </Head>
 
             <section className="py-20 bg-primary-950 min-h-screen relative overflow-hidden">
@@ -26,30 +38,43 @@ export default function ProductShow({ auth, product }) {
                 <div className="absolute bottom-0 left-0 size-[600px] bg-primary-400/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2"></div>
 
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-                    {/* Breadcrumbs */}
-                    <nav className="flex items-center gap-2 mb-12 text-[10px] font-bold uppercase tracking-[0.2em] text-primary-500">
-                        <Link href="/" className="hover:text-accent-500 transition-colors">Inicio</Link>
-                        <span>/</span>
-                        <Link href={route('catalog')} className="hover:text-accent-500 transition-colors">Catálogo</Link>
-                        <span>/</span>
-                        <span className="text-accent-500">{product.category?.name || 'OEM'}</span>
-                    </nav>
+                    <Breadcrumbs items={[
+                        { label: 'Catálogo', href: route('catalog') },
+                        { label: product.category?.name || 'OEM', href: route('catalog', { category: product.category?.id }) },
+                        { label: product.name },
+                    ]} />
 
                     <div className="grid lg:grid-cols-2 gap-20 items-start">
                         {/* Image Gallery Section */}
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             <div className="aspect-square bg-primary-900 rounded-[3rem] border border-white/5 ring-1 ring-white/10 p-10 flex items-center justify-center relative overflow-hidden group shadow-3xl">
                                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.05),transparent)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-                                {product.image_url ? (
+                                {activeImage ? (
                                     <img
-                                        src={product.image_url}
+                                        src={activeImage}
                                         alt={product.name}
                                         className="size-full object-contain grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000"
+                                        loading="lazy"
                                     />
                                 ) : (
                                     <span className="text-9xl opacity-10">📦</span>
                                 )}
                             </div>
+
+                            {/* Thumbnails */}
+                            {galleryImages.length > 1 && (
+                                <div className="flex gap-3 overflow-x-auto pb-2">
+                                    {galleryImages.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setActiveImage(img)}
+                                            className={`flex-shrink-0 size-20 rounded-xl border-2 overflow-hidden transition-all ${activeImage === img ? 'border-accent-500 ring-2 ring-accent-500/30' : 'border-white/10 hover:border-white/30'}`}
+                                        >
+                                            <img src={img} alt="" className="size-full object-cover" />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
 
                             {/* Specs Quick Look */}
                             <div className="grid grid-cols-3 gap-4">
@@ -62,7 +87,7 @@ export default function ProductShow({ auth, product }) {
                                 </div>
                                 <div className="tech-card !p-6 border-white/5 bg-primary-900/50">
                                     <div className="text-[9px] font-bold text-primary-500 uppercase tracking-widest mb-2">Garantía</div>
-                                    <div className="text-white text-xs font-bold uppercase tracking-widest">12 Meses</div>
+                                    <div className="text-white text-xs font-bold uppercase tracking-widest">{product.warranty || '12 Meses'}</div>
                                 </div>
                                 <div className="tech-card !p-6 border-white/5 bg-primary-900/50">
                                     <div className="text-[9px] font-bold text-primary-500 uppercase tracking-widest mb-2">Soporte</div>
@@ -177,20 +202,60 @@ export default function ProductShow({ auth, product }) {
                         <div className="max-w-3xl">
                             <h2 className="text-4xl font-display font-medium text-white mb-12 tracking-tight">Especificaciones <span className="text-primary-500 italic">de Ingeniería</span></h2>
                             <div className="space-y-4">
-                                {[
-                                    { label: 'Factor de Forma', value: 'Variable según configuración' },
-                                    { label: 'Arquitectura', value: 'X86-64 / ARM / Personalizada' },
-                                    { label: 'Certificaciones', value: 'CE, FCC, RoHS, ISO 9001' },
-                                    { label: 'Procedencia', value: 'Importación Directa (Tier 1 Global)' },
-                                ].map((spec, i) => (
-                                    <div key={i} className="flex justify-between items-center py-5 border-b border-white/5 group hover:bg-white/5 px-6 rounded-xl transition-colors">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary-500">{spec.label}</span>
-                                        <span className="text-sm text-white font-light">{spec.value}</span>
-                                    </div>
-                                ))}
+                                {product.specifications && product.specifications.length > 0 ? (
+                                    product.specifications.map((spec, i) => (
+                                        <div key={i} className="flex justify-between items-center py-5 border-b border-white/5 group hover:bg-white/5 px-6 rounded-xl transition-colors">
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary-500">{spec.label}</span>
+                                            <span className="text-sm text-white font-light">{spec.value}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    [
+                                        { label: 'Categoría', value: product.category?.name || 'OEM' },
+                                        { label: 'Garantía', value: product.warranty || '12 Meses' },
+                                        { label: 'Procedencia', value: 'Importación Directa (Tier 1 Global)' },
+                                        { label: 'Certificaciones', value: 'CE, FCC, RoHS' },
+                                    ].map((spec, i) => (
+                                        <div key={i} className="flex justify-between items-center py-5 border-b border-white/5 group hover:bg-white/5 px-6 rounded-xl transition-colors">
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary-500">{spec.label}</span>
+                                            <span className="text-sm text-white font-light">{spec.value}</span>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
+
+                    {/* Related Products */}
+                    {relatedProducts && relatedProducts.length > 0 && (
+                        <div className="mt-32 pt-20 border-t border-white/5">
+                            <h2 className="text-4xl font-display font-medium text-white mb-12 tracking-tight">
+                                También te puede <span className="text-accent-500 italic">interesar</span>
+                            </h2>
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {relatedProducts.map(rp => (
+                                    <Link
+                                        key={rp.id}
+                                        href={route('catalog.show', rp.slug)}
+                                        className="group tech-card !p-6 hover:border-accent-500/30 transition-all duration-500"
+                                    >
+                                        <div className="aspect-square bg-primary-950 rounded-xl mb-4 flex items-center justify-center overflow-hidden border border-white/5">
+                                            {rp.image_url ? (
+                                                <img src={rp.image_url} alt={rp.name} loading="lazy" className="size-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            ) : (
+                                                <span className="text-4xl opacity-10">📦</span>
+                                            )}
+                                        </div>
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-accent-400 mb-2">{rp.category?.name || 'OEM'}</p>
+                                        <h3 className="text-sm font-bold text-white group-hover:text-accent-400 transition-colors line-clamp-2">{rp.name}</h3>
+                                        <p className="text-xs text-primary-400 mt-2 font-mono">
+                                            {rp.price > 0 ? `$${new Intl.NumberFormat('es-CL').format(rp.price)} CLP` : 'Cotizar'}
+                                        </p>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </section>
         </PublicLayout>

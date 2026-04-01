@@ -6,6 +6,11 @@ export default function Cart({ auth, cart, subtotal, shippingRates }) {
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [shippingCost, setShippingCost] = useState(0);
     const [documentType, setDocumentType] = useState('boleta');
+    const [couponCode, setCouponCode] = useState('');
+    const [couponDiscount, setCouponDiscount] = useState(0);
+    const [couponApplied, setCouponApplied] = useState(null);
+    const [couponError, setCouponError] = useState('');
+    const [couponLoading, setCouponLoading] = useState(false);
 
     const [createAccount, setCreateAccount] = useState(false);
 
@@ -25,6 +30,7 @@ export default function Cart({ auth, cart, subtotal, shippingRates }) {
         create_account: false,
         password: '',
         password_confirmation: '',
+        coupon_code: '',
     });
 
     const handleRegionChange = (regionId) => {
@@ -47,7 +53,45 @@ export default function Cart({ auth, cart, subtotal, shippingRates }) {
     const netTotal = subtotal;
     const iva = Math.round(netTotal * 0.19);
     const productsWithIva = netTotal + iva;
-    const total = productsWithIva + shippingCost;
+    const totalBeforeDiscount = productsWithIva + shippingCost;
+    const total = Math.max(0, totalBeforeDiscount - couponDiscount);
+
+    const applyCoupon = async () => {
+        if (!couponCode.trim()) return;
+        setCouponLoading(true);
+        setCouponError('');
+        try {
+            const response = await fetch(route('cart.coupon'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                },
+                body: JSON.stringify({ code: couponCode, subtotal: productsWithIva }),
+            });
+            const result = await response.json();
+            if (result.valid) {
+                setCouponDiscount(result.discount);
+                setCouponApplied(result);
+                setData('coupon_code', couponCode);
+            } else {
+                setCouponError(result.message || 'Cupón no válido');
+                setCouponDiscount(0);
+                setCouponApplied(null);
+            }
+        } catch {
+            setCouponError('Error al validar cupón');
+        }
+        setCouponLoading(false);
+    };
+
+    const removeCoupon = () => {
+        setCouponCode('');
+        setCouponDiscount(0);
+        setCouponApplied(null);
+        setCouponError('');
+        setData('coupon_code', '');
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -337,6 +381,40 @@ export default function Cart({ auth, cart, subtotal, shippingRates }) {
                                             <span className="text-accent-500 font-bold">
                                                 {shippingCost > 0 ? `$${new Intl.NumberFormat('es-CL').format(shippingCost)}` : '--'}
                                             </span>
+                                        </div>
+
+                                        {/* Coupon Section */}
+                                        <div className="py-3 border-b border-white/5">
+                                            {couponApplied ? (
+                                                <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
+                                                    <div>
+                                                        <span className="text-green-400 text-xs font-bold uppercase tracking-wider">Cupón: {couponApplied.code}</span>
+                                                        <p className="text-green-300 text-xs">-${new Intl.NumberFormat('es-CL').format(couponDiscount)}</p>
+                                                    </div>
+                                                    <button type="button" onClick={removeCoupon} className="text-red-400 hover:text-red-300 text-xs">✕</button>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={couponCode}
+                                                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                                            placeholder="Código de cupón"
+                                                            className="flex-1 bg-primary-800/50 border border-white/10 rounded-lg px-3 py-2 text-white text-xs placeholder:text-primary-500 focus:border-accent-500/50 focus:outline-none"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={applyCoupon}
+                                                            disabled={couponLoading}
+                                                            className="px-3 py-2 bg-accent-500/20 text-accent-400 rounded-lg text-xs font-bold hover:bg-accent-500/30 transition disabled:opacity-50"
+                                                        >
+                                                            {couponLoading ? '...' : 'Aplicar'}
+                                                        </button>
+                                                    </div>
+                                                    {couponError && <p className="text-red-400 text-xs mt-1">{couponError}</p>}
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="flex justify-between items-end pt-6">

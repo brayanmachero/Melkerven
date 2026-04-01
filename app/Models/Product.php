@@ -11,6 +11,8 @@ class Product extends Model
         'name',
         'slug',
         'description',
+        'specifications',
+        'warranty',
         'price',
         'stock',
         'is_quotable',
@@ -30,6 +32,7 @@ class Product extends Model
         'is_quotable' => 'boolean',
         'is_active' => 'boolean',
         'images' => 'json',
+        'specifications' => 'json',
         'price' => 'decimal:2',
     ];
 

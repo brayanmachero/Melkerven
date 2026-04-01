@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Create({ auth, categories }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -11,7 +12,23 @@ export default function Create({ auth, categories }) {
         image: null,
         is_active: true,
         is_quotable: false,
+        warranty: '12 Meses',
+        specifications: [],
     });
+
+    const addSpec = () => {
+        setData('specifications', [...data.specifications, { label: '', value: '' }]);
+    };
+
+    const removeSpec = (index) => {
+        setData('specifications', data.specifications.filter((_, i) => i !== index));
+    };
+
+    const updateSpec = (index, field, value) => {
+        const updated = [...data.specifications];
+        updated[index][field] = value;
+        setData('specifications', updated);
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -111,20 +128,75 @@ export default function Create({ auth, categories }) {
                                     />
                                     {errors.stock && <div className="text-red-500 text-xs mt-2">{errors.stock}</div>}
                                 </div>
-                                <div className="flex flex-col justify-end">
-                                    <div className="flex items-center gap-4 p-4 bg-primary-950 rounded-xl border border-accent-500/20">
-                                        <input
-                                            type="checkbox"
-                                            id="is_quotable"
-                                            className="size-5 rounded bg-primary-900 border-white/10 text-accent-500 focus:ring-accent-500 ring-offset-primary-950"
-                                            checked={data.is_quotable}
-                                            onChange={e => setData('is_quotable', e.target.checked)}
-                                        />
-                                        <label htmlFor="is_quotable" className="text-[10px] font-bold uppercase tracking-widest text-white cursor-pointer select-none">
-                                            Habilitar Cotización
-                                        </label>
-                                    </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-primary-500 mb-3">Garantía</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-primary-950 border-white/10 rounded-xl px-5 py-4 text-white focus:border-accent-500 focus:ring-accent-500/20 transition-all font-light"
+                                        placeholder="Ej: 12 Meses"
+                                        value={data.warranty}
+                                        onChange={e => setData('warranty', e.target.value)}
+                                    />
                                 </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-primary-950 rounded-xl border border-accent-500/20">
+                                <input
+                                    type="checkbox"
+                                    id="is_quotable"
+                                    className="size-5 rounded bg-primary-900 border-white/10 text-accent-500 focus:ring-accent-500 ring-offset-primary-950"
+                                    checked={data.is_quotable}
+                                    onChange={e => setData('is_quotable', e.target.checked)}
+                                />
+                                <label htmlFor="is_quotable" className="text-[10px] font-bold uppercase tracking-widest text-white cursor-pointer select-none">
+                                    Habilitar Cotización
+                                </label>
+                            </div>
+
+                            {/* Dynamic Specifications */}
+                            <div>
+                                <div className="flex items-center justify-between mb-4">
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest text-primary-500">Especificaciones Técnicas</label>
+                                    <button
+                                        type="button"
+                                        onClick={addSpec}
+                                        className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent-400 hover:text-accent-300 transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                        Agregar Spec
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {data.specifications.map((spec, index) => (
+                                        <div key={index} className="flex gap-3 items-start">
+                                            <input
+                                                type="text"
+                                                className="flex-1 bg-primary-950 border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-accent-500 focus:ring-accent-500/20 transition-all font-light"
+                                                placeholder="Ej: Procesador, RAM, Almacenamiento..."
+                                                value={spec.label}
+                                                onChange={e => updateSpec(index, 'label', e.target.value)}
+                                            />
+                                            <input
+                                                type="text"
+                                                className="flex-1 bg-primary-950 border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-accent-500 focus:ring-accent-500/20 transition-all font-light"
+                                                placeholder="Ej: Intel Xeon E5-2690 v4"
+                                                value={spec.value}
+                                                onChange={e => updateSpec(index, 'value', e.target.value)}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeSpec(index)}
+                                                className="size-11 shrink-0 flex items-center justify-center bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl hover:bg-red-500/20 transition-colors"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {data.specifications.length === 0 && (
+                                        <p className="text-xs text-primary-600 italic py-4 text-center border border-dashed border-white/5 rounded-xl">Sin especificaciones. Haz clic en "Agregar Spec" para añadir.</p>
+                                    )}
+                                </div>
+                                {errors.specifications && <div className="text-red-500 text-xs mt-2">{errors.specifications}</div>}
                             </div>
 
                             <div className="py-10 border-y border-white/5">
