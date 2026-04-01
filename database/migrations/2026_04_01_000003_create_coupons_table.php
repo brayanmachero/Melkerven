@@ -22,7 +22,7 @@ return new class extends Migration
         });
 
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('coupon_code')->nullable()->after('total');
+            $table->string('coupon_code')->nullable()->after('total_amount');
             $table->decimal('discount', 10, 2)->default(0)->after('coupon_code');
         });
     }

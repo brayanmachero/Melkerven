@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Mail;
+
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
