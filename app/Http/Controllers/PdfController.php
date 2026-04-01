@@ -23,7 +23,7 @@ class PdfController extends Controller
         $pdf = Pdf::loadView('pdf.order', compact('order'))
             ->setPaper('letter');
 
-        return $pdf->download("orden-{$order->order_number}.pdf");
+        return $pdf->download("orden-{$order->buy_order}.pdf");
     }
 
     public function quote(Quote $quote)

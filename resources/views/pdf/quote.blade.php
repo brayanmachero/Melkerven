@@ -18,7 +18,6 @@
         table.items { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
         table.items th { background: #f1f5f9; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #64748b; font-weight: 700; padding: 10px 12px; text-align: left; border-bottom: 2px solid #e2e8f0; }
         table.items td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 11px; }
-        .status { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; }
         .note { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; margin-top: 20px; font-size: 11px; color: #475569; }
     </style>
@@ -34,8 +33,11 @@
         <div class="info-grid">
             <div class="info-col">
                 <div class="info-label">Solicitante</div>
-                <div class="info-value"><strong>{{ $quote->user?->name ?? 'Cliente' }}</strong></div>
-                <div class="info-value">{{ $quote->user?->email ?? '-' }}</div>
+                <div class="info-value"><strong>{{ $quote->customer_name }}</strong></div>
+                <div class="info-value">{{ $quote->customer_email }}</div>
+                @if($quote->customer_phone)
+                    <div class="info-value">Tel: {{ $quote->customer_phone }}</div>
+                @endif
             </div>
             <div class="info-col" style="text-align: right;">
                 <div class="info-label">Detalles</div>
@@ -48,37 +50,24 @@
         <table class="items">
             <thead>
                 <tr>
-                    <th style="width: 60%">Producto / Descripción</th>
+                    <th style="width: 60%">Producto</th>
                     <th>Cantidad</th>
-                    @if($quote->items->contains(fn($i) => $i->price > 0))
-                    <th style="text-align: right;">Precio Ref.</th>
-                    @endif
                 </tr>
             </thead>
             <tbody>
                 @foreach($quote->items as $item)
                 <tr>
-                    <td>{{ $item->product?->name ?? $item->description ?? 'Item' }}</td>
+                    <td>{{ $item->product?->name ?? 'Producto' }}</td>
                     <td>{{ $item->quantity }}</td>
-                    @if($quote->items->contains(fn($i) => $i->price > 0))
-                    <td style="text-align: right;">{{ $item->price > 0 ? '$' . number_format($item->price, 0, ',', '.') : 'A cotizar' }}</td>
-                    @endif
                 </tr>
                 @endforeach
             </tbody>
         </table>
 
-        @if($quote->notes)
+        @if($quote->message)
         <div class="note">
-            <div class="info-label" style="margin-bottom: 8px;">Notas del Cliente</div>
-            {{ $quote->notes }}
-        </div>
-        @endif
-
-        @if($quote->admin_notes)
-        <div class="note" style="margin-top: 15px;">
-            <div class="info-label" style="margin-bottom: 8px;">Respuesta de Melkerven</div>
-            {{ $quote->admin_notes }}
+            <div class="info-label" style="margin-bottom: 8px;">Mensaje del Cliente</div>
+            {{ $quote->message }}
         </div>
         @endif
 

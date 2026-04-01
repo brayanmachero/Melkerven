@@ -16,11 +16,11 @@ class DashboardController extends Controller
     public function index()
     {
         // Monthly sales for last 6 months
-        $monthlySales = Order::where('payment_status', 'paid')
+        $monthlySales = Order::where('status', 'paid')
             ->where('created_at', '>=', now()->subMonths(6))
             ->select(
                 DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
-                DB::raw('SUM(total) as revenue'),
+                DB::raw('SUM(total_amount) as revenue'),
                 DB::raw('COUNT(*) as count')
             )
             ->groupBy('month')
@@ -31,7 +31,7 @@ class DashboardController extends Controller
         $topProducts = DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where('orders.payment_status', 'paid')
+            ->where('orders.status', 'paid')
             ->select('products.name', DB::raw('SUM(order_items.quantity) as total_sold'), DB::raw('SUM(order_items.subtotal) as total_revenue'))
             ->groupBy('products.name')
             ->orderByDesc('total_sold')
@@ -45,11 +45,10 @@ class DashboardController extends Controller
             ->get()
             ->map(fn ($o) => [
                 'id' => $o->id,
-                'order_number' => $o->order_number,
-                'customer' => $o->user?->name ?? $o->guest_name ?? 'Invitado',
-                'total' => $o->total,
+                'order_number' => $o->buy_order,
+                'customer' => $o->user?->name ?? $o->customer_name ?? 'Invitado',
+                'total' => $o->total_amount,
                 'status' => $o->status,
-                'payment_status' => $o->payment_status,
                 'created_at' => $o->created_at->diffForHumans(),
             ]);
 
@@ -74,7 +73,7 @@ class DashboardController extends Controller
                 'quotes_count' => Quote::count(),
                 'messages_count' => \App\Models\ContactMessage::count(),
                 'users_count' => \App\Models\User::count(),
-                'revenue' => Order::where('payment_status', 'paid')->sum('total'),
+                'revenue' => Order::where('status', 'paid')->sum('total_amount'),
                 'pending_orders' => Order::where('status', 'pending')->count(),
             ],
             'monthlySales' => $monthlySales,

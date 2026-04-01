@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Orden #{{ $order->order_number }}</title>
+    <title>Orden #{{ $order->buy_order }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #1e293b; line-height: 1.5; }
@@ -38,7 +38,7 @@
         </div>
         <div style="text-align: right;">
             <h1>ORDEN DE COMPRA</h1>
-            <div class="order-num">#{{ $order->order_number }}</div>
+            <div class="order-num">#{{ $order->buy_order }}</div>
         </div>
     </div>
 
@@ -46,16 +46,19 @@
         <div class="info-grid">
             <div class="info-col">
                 <div class="info-label">Datos del Cliente</div>
-                <div class="info-value"><strong>{{ $order->user?->name ?? $order->guest_name ?? 'Invitado' }}</strong></div>
-                <div class="info-value">{{ $order->user?->email ?? $order->guest_email ?? '-' }}</div>
-                @if($order->guest_phone)
-                    <div class="info-value">Tel: {{ $order->guest_phone }}</div>
+                <div class="info-value"><strong>{{ $order->user?->name ?? $order->customer_name }}</strong></div>
+                <div class="info-value">{{ $order->user?->email ?? $order->customer_email }}</div>
+                @if($order->customer_phone)
+                    <div class="info-value">Tel: {{ $order->customer_phone }}</div>
+                @endif
+                @if($order->customer_rut)
+                    <div class="info-value">RUT: {{ $order->customer_rut }}</div>
                 @endif
             </div>
             <div class="info-col" style="text-align: right;">
                 <div class="info-label">Información de la Orden</div>
                 <div class="info-value">Fecha: {{ $order->created_at->format('d/m/Y H:i') }}</div>
-                <div class="info-value">Estado: <span class="status {{ $order->payment_status === 'paid' ? 'status-paid' : 'status-pending' }}">{{ $order->payment_status }}</span></div>
+                <div class="info-value">Estado: <span class="status {{ $order->status === 'paid' ? 'status-paid' : 'status-pending' }}">{{ $order->status }}</span></div>
                 @if($order->document_type)
                     <div class="info-value">Documento: {{ $order->document_type === 'boleta' ? 'Boleta' : 'Factura' }}</div>
                 @endif
@@ -66,9 +69,19 @@
         <div style="margin-bottom: 25px;">
             <div class="info-label">Dirección de Envío</div>
             <div class="info-value">{{ $order->shipping_address }}</div>
-            @if($order->shipping_region)
-                <div class="info-value">{{ $order->shipping_region }}</div>
+            @if($order->shipping_commune)
+                <div class="info-value">{{ $order->shipping_commune }}</div>
             @endif
+        </div>
+        @endif
+
+        @if($order->document_type === 'factura' && $order->business_name)
+        <div style="margin-bottom: 25px;">
+            <div class="info-label">Datos de Facturación</div>
+            <div class="info-value">{{ $order->business_name }}</div>
+            <div class="info-value">RUT: {{ $order->business_rut }}</div>
+            <div class="info-value">Giro: {{ $order->business_giro }}</div>
+            <div class="info-value">{{ $order->business_address }}</div>
         </div>
         @endif
 
@@ -84,10 +97,10 @@
             <tbody>
                 @foreach($order->items as $item)
                 <tr>
-                    <td>{{ $item->product?->name ?? $item->product_name ?? 'Producto' }}</td>
+                    <td>{{ $item->product_name }}</td>
                     <td>{{ $item->quantity }}</td>
                     <td style="text-align: right;">${{ number_format($item->price, 0, ',', '.') }}</td>
-                    <td style="text-align: right;">${{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                    <td style="text-align: right;">${{ number_format($item->price * $item->quantity, 0, ',', '.') }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -95,18 +108,22 @@
 
         <div class="totals">
             <div class="row">
-                <span class="label">Subtotal: </span>
-                <span class="value">${{ number_format($order->subtotal, 0, ',', '.') }}</span>
+                <span class="label">Neto: </span>
+                <span class="value">${{ number_format($order->net_amount, 0, ',', '.') }}</span>
             </div>
-            @if($order->shipping_cost > 0)
+            <div class="row">
+                <span class="label">IVA (19%): </span>
+                <span class="value">${{ number_format($order->tax_amount, 0, ',', '.') }}</span>
+            </div>
+            @if($order->shipping_amount > 0)
             <div class="row">
                 <span class="label">Envío: </span>
-                <span class="value">${{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                <span class="value">${{ number_format($order->shipping_amount, 0, ',', '.') }}</span>
             </div>
             @endif
             <div class="row">
                 <span class="label">Total: </span>
-                <span class="total-final">${{ number_format($order->total, 0, ',', '.') }} CLP</span>
+                <span class="total-final">${{ number_format($order->total_amount, 0, ',', '.') }} CLP</span>
             </div>
         </div>
 

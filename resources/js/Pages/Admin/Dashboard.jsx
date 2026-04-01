@@ -143,7 +143,6 @@ export default function Dashboard({ auth, stats, monthlySales, topProducts, rece
                                             <th className="text-[9px] font-bold uppercase tracking-widest text-primary-500 py-3 text-left">Cliente</th>
                                             <th className="text-[9px] font-bold uppercase tracking-widest text-primary-500 py-3 text-right">Total</th>
                                             <th className="text-[9px] font-bold uppercase tracking-widest text-primary-500 py-3 text-center">Estado</th>
-                                            <th className="text-[9px] font-bold uppercase tracking-widest text-primary-500 py-3 text-center">Pago</th>
                                             <th className="text-[9px] font-bold uppercase tracking-widest text-primary-500 py-3 text-right">Fecha</th>
                                         </tr>
                                     </thead>
@@ -154,13 +153,8 @@ export default function Dashboard({ auth, stats, monthlySales, topProducts, rece
                                                 <td className="py-3 text-xs text-primary-300">{order.customer}</td>
                                                 <td className="py-3 text-xs text-white text-right font-mono">${new Intl.NumberFormat('es-CL').format(order.total)}</td>
                                                 <td className="py-3 text-center">
-                                                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-md ${order.status === 'completed' ? 'bg-green-500/10 text-green-400' : order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' : 'bg-accent-500/10 text-accent-400'}`}>
+                                                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-md ${order.status === 'paid' ? 'bg-green-500/10 text-green-400' : order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' : 'bg-accent-500/10 text-accent-400'}`}>
                                                         {order.status}
-                                                    </span>
-                                                </td>
-                                                <td className="py-3 text-center">
-                                                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-md ${order.payment_status === 'paid' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                                                        {order.payment_status}
                                                     </span>
                                                 </td>
                                                 <td className="py-3 text-xs text-primary-500 text-right">{order.created_at}</td>
