@@ -24,15 +24,9 @@ export default function Dashboard({ auth, stats, monthlySales, topProducts, rece
         <AuthenticatedLayout
             auth={auth}
             header={
-                <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="h-px w-8 bg-accent-500"></div>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent-500">Centro de Control</span>
-                    </div>
-                    <h2 className="text-4xl font-display font-medium text-white tracking-tighter">
-                        Panel de <span className="text-accent-500">Administración</span>
-                    </h2>
-                </div>
+                <h2 className="text-lg font-display font-bold text-white">
+                    Panel de <span className="text-accent-500">Administración</span>
+                </h2>
             }
         >
             <Head title="Admin Dashboard" />

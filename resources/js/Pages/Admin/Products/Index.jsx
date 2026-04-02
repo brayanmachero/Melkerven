@@ -34,8 +34,8 @@ export default function Index({ auth, products, categories, filters }) {
         <AuthenticatedLayout
             auth={auth}
             header={
-                <div className="flex justify-between items-center">
-                    <h2 className="text-3xl font-display font-medium text-white tracking-tight leading-tight">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-display font-bold text-white">
                         Gestión de <span className="text-accent-500">Productos</span>
                     </h2>
                     <div className="flex items-center gap-3">

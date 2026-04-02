@@ -42,21 +42,15 @@ export default function Index({ orders, filters }) {
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex justify-between items-end">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="h-px w-8 bg-accent-500"></div>
-                            <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent-500 underline decoration-accent-500/30 underline-offset-8">Logística de Despacho</span>
-                        </div>
-                        <h2 className="text-4xl font-display font-medium text-white tracking-tighter">
-                            Gestión de <span className="text-accent-500">Pedidos</span>
-                        </h2>
-                    </div>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-display font-bold text-white">
+                        Gestión de <span className="text-accent-500">Pedidos</span>
+                    </h2>
                     <a
                         href={route('admin.orders.export')}
-                        className="btn-premium bg-white/5 text-white border border-white/10 hover:bg-white/10 text-[10px] font-bold uppercase tracking-widest px-6 py-3 shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+                        className="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-primary-300 hover:bg-white/10 hover:text-white transition-all text-[10px] font-bold uppercase tracking-widest"
                     >
-                        Exportar CSV
+                        ↓ CSV
                     </a>
                 </div>
             }

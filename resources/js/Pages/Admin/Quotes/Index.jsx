@@ -25,15 +25,9 @@ export default function Index({ quotes }) {
     return (
         <AuthenticatedLayout
             header={
-                <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="h-px w-8 bg-accent-500"></div>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-accent-500">Solicitudes de Precio</span>
-                    </div>
-                    <h2 className="text-4xl font-display font-medium text-white tracking-tighter">
-                        Gestión de <span className="text-accent-500">Cotizaciones</span>
-                    </h2>
-                </div>
+                <h2 className="text-lg font-display font-bold text-white">
+                    Gestión de <span className="text-accent-500">Cotizaciones</span>
+                </h2>
             }
         >
             <Head title="Cotizaciones - Admin" />
