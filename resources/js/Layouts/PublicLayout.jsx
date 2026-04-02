@@ -288,7 +288,7 @@ export default function PublicLayout({ children, auth }) {
                         </div>
                     </div>
                     <div className="mt-20 pt-8 border-t border-white/5 text-[10px] text-center uppercase tracking-widest font-bold text-primary-600">
-                        © {new Date().getFullYear()} Melkerven Chile <span className="mx-2">•</span> High-Tech Infrastructure Division
+                        © {new Date().getFullYear()} Melkerven Chile <span className="mx-2">•</span> Infraestructura Tecnológica de Alto Nivel
                     </div>
                 </div>
             </footer>

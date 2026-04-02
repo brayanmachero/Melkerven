@@ -56,7 +56,7 @@ export default function Catalog({ auth, products, categories, filters, wishlistI
                     <div className="mb-12">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="h-px w-12 bg-accent-500"></div>
-                            <span className="text-xs font-bold uppercase tracking-[0.3em] text-accent-500">Suministro Crítico</span>
+                            <span className="text-xs font-bold uppercase tracking-[0.3em] text-accent-500">Catálogo Profesional</span>
                         </div>
                         <h1 className="text-5xl sm:text-7xl font-display font-medium text-white mb-6 tracking-tighter">
                             Catálogo de <span className="text-accent-500 font-light">Hardware</span>
@@ -300,7 +300,7 @@ export default function Catalog({ auth, products, categories, filters, wishlistI
                                     href={route('contact')}
                                     className="btn-premium bg-white text-primary-950 hover:bg-primary-50 px-10"
                                 >
-                                    Abrir Ticket de Soporte
+                                    Solicitar Cotización
                                 </Link>
                             </div>
                             <div className="relative hidden lg:block">

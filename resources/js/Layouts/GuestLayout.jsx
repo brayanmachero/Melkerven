@@ -23,7 +23,7 @@ export default function GuestLayout({ children }) {
                             <span className="text-xs font-bold uppercase tracking-[0.4em] text-accent-500">Acceso Restringido</span>
                         </div>
                         <h2 className="text-5xl font-display font-medium text-white mb-6 tracking-tighter leading-tight">
-                            Infraestructura de <br /> <span className="text-accent-500 font-light">Suministro Crítico</span>
+                            Infraestructura de <br /> <span className="text-accent-500 font-light">Alto Nivel</span>
                         </h2>
                         <p className="text-primary-400 max-w-md font-light leading-relaxed">
                             Ingrese a su terminal privada para gestionar órdenes de hardware industrial y solicitudes de importación global.

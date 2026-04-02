@@ -11,9 +11,9 @@ export default function Home({ auth }) {
         <PublicLayout auth={auth}>
             <Head>
                 <title>Infraestructura TI de Alto Nivel - Melkerven</title>
-                <meta name="description" content="Melkerven Chile: Suministro crítico de hardware, servidores y componentes de TI importados. Potenciamos la continuidad operativa de su empresa con estándares globales." />
+                <meta name="description" content="Melkerven Chile: Proveedor especializado de hardware, servidores y componentes de TI importados. Potenciamos la continuidad operativa de su empresa con estándares globales." />
                 <meta property="og:title" content="Infraestructura TI de Alto Nivel - Melkerven" />
-                <meta property="og:description" content="Suministro crítico de hardware, servidores y componentes de TI importados. Potenciamos la continuidad operativa de su empresa." />
+                <meta property="og:description" content="Proveedor especializado de hardware, servidores y componentes de TI importados. Potenciamos la continuidad operativa de su empresa." />
                 <meta property="og:image" content="/images/logo-light.png" />
                 <meta property="og:type" content="website" />
             </Head>
@@ -46,7 +46,7 @@ export default function Home({ auth }) {
                         </h1>
 
                         <p className="text-lg text-primary-200 mb-10 leading-relaxed max-w-xl font-light">
-                            Melkerven Chile: Suministro crítico de hardware, servidores y componentes de TI importados. Potenciamos la continuidad operativa de su empresa con estándares globales.
+                            Melkerven Chile: Proveedor especializado de hardware, servidores y componentes de TI importados. Potenciamos la continuidad operativa de su empresa con estándares globales.
                         </p>
 
                         <div className="flex flex-wrap gap-5">
@@ -167,7 +167,7 @@ export default function Home({ auth }) {
 
                         <div className="relative z-10 text-center max-w-4xl mx-auto">
                             <h2 className="text-4xl sm:text-6xl font-display font-medium text-white mb-8 tracking-tighter leading-tight">
-                                Impulse su <span className="text-accent-500">Potencia de Fuego</span> Tecnológica.
+                                Impulse su <span className="text-accent-500">Infraestructura</span> Tecnológica.
                             </h2>
                             <p className="text-lg text-primary-300 mb-10 max-w-2xl mx-auto font-light">
                                 ¿Busca un componente descatalogado o necesita armar un datacenter desde cero? Nosotros lo gestionamos.
@@ -177,7 +177,7 @@ export default function Home({ auth }) {
                                     href="/contact"
                                     className="btn-premium bg-white text-primary-950 hover:bg-primary-50 px-12"
                                 >
-                                    Solicitar Información Crítica
+                                    Solicitar Cotización
                                 </Link>
                                 <a
                                     href="https://wa.me/56988198559"
