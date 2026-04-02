@@ -1,0 +1,22 @@
+{
+    "name": "Melkerven - Servers, Networking & Storage Hardware",
+    "short_name": "Melkerven",
+    "description": "Infraestructura tecnológica de alto nivel. Servidores, networking y almacenamiento.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0b1120",
+    "theme_color": "#0ea5e9",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/images/logo-light.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/images/logo-light.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

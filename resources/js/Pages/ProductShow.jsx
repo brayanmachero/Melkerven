@@ -7,6 +7,8 @@ export default function ProductShow({ auth, product, relatedProducts }) {
     const [quantity, setQuantity] = useState(1);
     const [adding, setAdding] = useState(false);
     const [activeImage, setActiveImage] = useState(product.image_url);
+    const [notifyEmail, setNotifyEmail] = useState(auth?.user?.email || '');
+    const [notifySubmitted, setNotifySubmitted] = useState(false);
 
     // Build gallery: main image + additional images
     const galleryImages = [
@@ -101,7 +103,7 @@ export default function ProductShow({ auth, product, relatedProducts }) {
                             <div className="mb-10">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="h-px w-8 bg-accent-500"></div>
-                                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent-500">Hardware de Grado Misión</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent-500">Hardware Profesional</span>
                                 </div>
                                 <h1 className="text-5xl sm:text-6xl font-display font-medium text-white mb-6 tracking-tighter leading-tight italic">
                                     {product.name}
@@ -115,7 +117,7 @@ export default function ProductShow({ auth, product, relatedProducts }) {
                             <div className="tech-card !p-12 mb-12 border-accent-500/20 bg-primary-900/80 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] text-primary-500 font-bold uppercase tracking-widest mb-3">Valor de Adquisición</span>
+                                        <span className="text-[10px] text-primary-500 font-bold uppercase tracking-widest mb-3">Precio</span>
                                         <div className="flex items-baseline gap-2">
                                             <span className="text-5xl font-display font-medium text-white tracking-tighter">
                                                 {product.price > 0 ? `$${new Intl.NumberFormat('es-CL').format(product.price)}` : 'Sujeto a Cotización'}
@@ -131,6 +133,20 @@ export default function ProductShow({ auth, product, relatedProducts }) {
                                         </span>
                                     </div>
                                 </div>
+
+                                {product.volume_prices && product.volume_prices.length > 0 && (
+                                    <div className="mt-6 border-t border-white/5 pt-6">
+                                        <span className="text-[10px] text-primary-500 font-bold uppercase tracking-widest mb-3 block">Precios por Volumen</span>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                                            {product.volume_prices.map((tier, i) => (
+                                                <div key={i} className={`rounded-lg border px-3 py-2 text-center ${quantity >= tier.min_quantity && (!tier.max_quantity || quantity <= tier.max_quantity) ? 'border-accent-500/50 bg-accent-500/10' : 'border-white/10 bg-white/5'}`}>
+                                                    <div className="text-[10px] text-primary-400">{tier.min_quantity}{tier.max_quantity ? `-${tier.max_quantity}` : '+'} uds</div>
+                                                    <div className="text-sm font-bold text-white">${new Intl.NumberFormat('es-CL').format(tier.price)}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="mt-12 grid sm:grid-cols-2 gap-4">
                                     {product.is_quotable || product.price == 0 ? (
@@ -158,6 +174,33 @@ export default function ProductShow({ auth, product, relatedProducts }) {
                                             >
                                                 {adding ? 'Agregando...' : product.stock <= 0 ? 'Sin Stock' : 'Añadir al Carrito'}
                                             </button>
+                                            {product.stock <= 0 && (
+                                                <div className="mt-3">
+                                                    {notifySubmitted ? (
+                                                        <p className="text-green-400 text-xs text-center">Te notificaremos cuando haya stock.</p>
+                                                    ) : (
+                                                        <form onSubmit={(e) => {
+                                                            e.preventDefault();
+                                                            router.post(route('stock.notify'), { product_id: product.id, email: notifyEmail }, {
+                                                                preserveScroll: true,
+                                                                onSuccess: () => setNotifySubmitted(true),
+                                                            });
+                                                        }} className="flex gap-2">
+                                                            <input
+                                                                type="email"
+                                                                value={notifyEmail}
+                                                                onChange={e => setNotifyEmail(e.target.value)}
+                                                                placeholder="Tu email"
+                                                                required
+                                                                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-white/40"
+                                                            />
+                                                            <button type="submit" className="bg-accent-500/20 border border-accent-500/30 text-accent-400 hover:bg-accent-500/30 rounded-lg px-3 py-2 text-xs font-bold whitespace-nowrap">
+                                                                Avisarme
+                                                            </button>
+                                                        </form>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     <Link

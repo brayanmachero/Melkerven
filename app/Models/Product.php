@@ -40,4 +40,27 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function volumePrices()
+    {
+        return $this->hasMany(VolumePrice::class)->orderBy('min_quantity');
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('name');
+    }
+
+    public function getPriceForQuantity($quantity)
+    {
+        $volumePrice = $this->volumePrices()
+            ->where('min_quantity', '<=', $quantity)
+            ->where(function ($q) use ($quantity) {
+                $q->whereNull('max_quantity')->orWhere('max_quantity', '>=', $quantity);
+            })
+            ->orderBy('min_quantity', 'desc')
+            ->first();
+
+        return $volumePrice ? $volumePrice->price : $this->price;
+    }
 }

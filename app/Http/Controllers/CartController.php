@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ShippingRate;
+use App\Models\AbandonedCart;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -80,6 +81,17 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart);
+
+        // Track abandoned cart for logged-in users
+        if (auth()->check()) {
+            try {
+                AbandonedCart::updateOrCreate(
+                    ['user_id' => auth()->id()],
+                    ['cart_items' => array_values($cart), 'last_activity_at' => now(), 'email_sent' => false]
+                );
+            } catch (\Exception $e) {}
+        }
+
         return redirect()->back()->with('success', 'Producto añadido al carrito.');
     }
 
@@ -125,9 +137,13 @@ class CartController extends Controller
     {
         $request->validate(['code' => 'required|string', 'subtotal' => 'required|numeric']);
 
-        $coupon = \App\Models\Coupon::where('code', strtoupper($request->code))
-            ->where('is_active', true)
-            ->first();
+        try {
+            $coupon = \App\Models\Coupon::where('code', strtoupper($request->code))
+                ->where('is_active', true)
+                ->first();
+        } catch (\Exception $e) {
+            return response()->json(['valid' => false, 'message' => 'Sistema de cupones no disponible.']);
+        }
 
         if (!$coupon) {
             return response()->json(['valid' => false, 'message' => 'Cupón no encontrado o inactivo.']);

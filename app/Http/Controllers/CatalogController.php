@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -49,7 +50,8 @@ class CatalogController extends Controller
         return Inertia::render('Catalog', [
             'products' => $query->paginate(12)->withQueryString(),
             'categories' => Category::all(),
-            'filters' => $request->only(['category', 'search', 'sort', 'dir', 'min_price', 'max_price', 'in_stock'])
+            'filters' => $request->only(['category', 'search', 'sort', 'dir', 'min_price', 'max_price', 'in_stock']),
+            'wishlistIds' => auth()->check() ? (function() { try { return Wishlist::where('user_id', auth()->id())->pluck('product_id')->toArray(); } catch (\Exception $e) { return []; } })() : [],
         ]);
     }
 
@@ -69,9 +71,45 @@ class CatalogController extends Controller
             ->limit(4)
             ->get();
 
+        $productRelations = ['category'];
+        try {
+            $product->load('volumePrices');
+            $productRelations[] = 'volumePrices';
+        } catch (\Exception $e) {}
+
+        $reviews = [];
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('reviews')) {
+                $reviews = \App\Models\Review::with('user')
+                    ->where('product_id', $product->id)
+                    ->where('is_approved', true)
+                    ->latest()
+                    ->get();
+            }
+        } catch (\Exception $e) {}
+
         return Inertia::render('ProductShow', [
             'product' => $product->load('category'),
             'relatedProducts' => $relatedProducts,
+            'reviews' => $reviews,
+        ]);
+    }
+
+    public function compare(Request $request)
+    {
+        $ids = collect(explode(',', $request->input('ids', '')))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->take(4)
+            ->toArray();
+
+        $products = Product::with('category')
+            ->whereIn('id', $ids)
+            ->where('is_active', true)
+            ->get();
+
+        return Inertia::render('Compare', [
+            'products' => $products,
         ]);
     }
 }

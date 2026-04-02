@@ -1,5 +1,7 @@
 import { Link, usePage, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { useCurrency } from '../Contexts/CurrencyContext';
+import { useLanguage } from '../Contexts/LanguageContext';
 
 function NewsletterForm() {
     const { data, setData, post, processing, reset } = useForm({ email: '' });
@@ -40,6 +42,8 @@ function NewsletterForm() {
 
 export default function PublicLayout({ children, auth }) {
     const { cart_count, flash } = usePage().props;
+    const { currency, toggleCurrency } = useCurrency();
+    const { language, toggleLanguage, t } = useLanguage();
     const [showFlash, setShowFlash] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
@@ -113,13 +117,32 @@ export default function PublicLayout({ children, auth }) {
 
                         {/* Desktop Nav */}
                         <div className="hidden md:flex items-center space-x-8">
-                            <Link href="/" className="text-sm font-bold text-white hover:text-accent-400 transition-colors tracking-wide uppercase">Inicio</Link>
-                            <Link href={route('catalog')} className="text-sm font-bold text-primary-300 hover:text-accent-400 transition-colors tracking-wide uppercase">Catálogo</Link>
-                            <Link href={route('about')} className="text-sm font-bold text-primary-300 hover:text-accent-400 transition-colors tracking-wide uppercase">Quiénes Somos</Link>
-                            <Link href={route('contact')} className="text-sm font-bold text-primary-300 hover:text-accent-400 transition-colors tracking-wide uppercase">Contacto</Link>
+                            <Link href="/" className="text-sm font-bold text-white hover:text-accent-400 transition-colors tracking-wide uppercase">{t('nav.home')}</Link>
+                            <Link href={route('catalog')} className="text-sm font-bold text-primary-300 hover:text-accent-400 transition-colors tracking-wide uppercase">{t('nav.catalog')}</Link>
+                            <Link href={route('about')} className="text-sm font-bold text-primary-300 hover:text-accent-400 transition-colors tracking-wide uppercase">{t('nav.about')}</Link>
+                            <Link href={route('contact')} className="text-sm font-bold text-primary-300 hover:text-accent-400 transition-colors tracking-wide uppercase">{t('nav.contact')}</Link>
+                            <Link href={route('blog.index')} className="text-sm font-bold text-primary-300 hover:text-accent-400 transition-colors tracking-wide uppercase">{t('nav.blog')}</Link>
                         </div>
 
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-3">
+                            {/* Language Toggle */}
+                            <button
+                                onClick={toggleLanguage}
+                                className="hidden md:flex items-center px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-primary-400 hover:text-white hover:bg-white/10 transition-all"
+                                title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+                            >
+                                {language === 'es' ? 'EN' : 'ES'}
+                            </button>
+
+                            {/* Currency Toggle */}
+                            <button
+                                onClick={toggleCurrency}
+                                className="hidden md:flex items-center px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-primary-400 hover:text-white hover:bg-white/10 transition-all"
+                                title={currency === 'CLP' ? 'Switch to USD' : 'Cambiar a CLP'}
+                            >
+                                {currency}
+                            </button>
+
                             {/* Search Button */}
                             <button
                                 onClick={() => setSearchOpen(true)}
@@ -190,10 +213,15 @@ export default function PublicLayout({ children, auth }) {
                 {/* Mobile Menu */}
                 <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:hidden border-t border-white/5 bg-primary-950/95 backdrop-blur-xl`}>
                     <div className="px-4 py-4 space-y-1">
-                        <Link href="/" className="block px-4 py-3 rounded-xl text-sm font-bold text-white hover:bg-white/5 transition-all uppercase tracking-wide">Inicio</Link>
-                        <Link href={route('catalog')} className="block px-4 py-3 rounded-xl text-sm font-bold text-primary-300 hover:text-white hover:bg-white/5 transition-all uppercase tracking-wide">Catálogo</Link>
-                        <Link href={route('about')} className="block px-4 py-3 rounded-xl text-sm font-bold text-primary-300 hover:text-white hover:bg-white/5 transition-all uppercase tracking-wide">Quiénes Somos</Link>
-                        <Link href={route('contact')} className="block px-4 py-3 rounded-xl text-sm font-bold text-primary-300 hover:text-white hover:bg-white/5 transition-all uppercase tracking-wide">Contacto</Link>
+                        <Link href="/" className="block px-4 py-3 rounded-xl text-sm font-bold text-white hover:bg-white/5 transition-all uppercase tracking-wide">{t('nav.home')}</Link>
+                        <Link href={route('catalog')} className="block px-4 py-3 rounded-xl text-sm font-bold text-primary-300 hover:text-white hover:bg-white/5 transition-all uppercase tracking-wide">{t('nav.catalog')}</Link>
+                        <Link href={route('about')} className="block px-4 py-3 rounded-xl text-sm font-bold text-primary-300 hover:text-white hover:bg-white/5 transition-all uppercase tracking-wide">{t('nav.about')}</Link>
+                        <Link href={route('contact')} className="block px-4 py-3 rounded-xl text-sm font-bold text-primary-300 hover:text-white hover:bg-white/5 transition-all uppercase tracking-wide">{t('nav.contact')}</Link>
+                        <Link href={route('blog.index')} className="block px-4 py-3 rounded-xl text-sm font-bold text-primary-300 hover:text-white hover:bg-white/5 transition-all uppercase tracking-wide">{t('nav.blog')}</Link>
+                        <div className="flex items-center gap-2 px-4 py-3">
+                            <button onClick={toggleLanguage} className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-primary-400">{language === 'es' ? 'EN' : 'ES'}</button>
+                            <button onClick={toggleCurrency} className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-primary-400">{currency}</button>
+                        </div>
                     </div>
                     <div className="border-t border-white/5 px-4 py-4 space-y-1">
                         {auth?.user ? (
@@ -229,21 +257,24 @@ export default function PublicLayout({ children, auth }) {
                             </p>
                         </div>
                         <div>
-                            <h4 className="text-white font-bold mb-8 uppercase tracking-widest text-xs">Navegación</h4>
+                            <h4 className="text-white font-bold mb-8 uppercase tracking-widest text-xs">{t('footer.nav')}</h4>
                             <ul className="space-y-4 text-sm font-medium">
-                                <li><Link href="/" className="hover:text-accent-400 transition">Inicio</Link></li>
-                                <li><Link href="/catalog" className="hover:text-accent-400 transition">Catálogo</Link></li>
-                                <li><Link href="/about" className="hover:text-accent-400 transition">Nosotros</Link></li>
-                                <li><Link href="/contact" className="hover:text-accent-400 transition">Contacto</Link></li>
+                                <li><Link href="/" className="hover:text-accent-400 transition">{t('nav.home')}</Link></li>
+                                <li><Link href="/catalog" className="hover:text-accent-400 transition">{t('nav.catalog')}</Link></li>
+                                <li><Link href="/about" className="hover:text-accent-400 transition">{t('nav.about')}</Link></li>
+                                <li><Link href="/contact" className="hover:text-accent-400 transition">{t('nav.contact')}</Link></li>
+                                <li><Link href="/blog" className="hover:text-accent-400 transition">{t('nav.blog')}</Link></li>
+                                <li><Link href="/faq" className="hover:text-accent-400 transition">{t('nav.faq')}</Link></li>
+                                <li><Link href="/tracking" className="hover:text-accent-400 transition">{t('nav.tracking')}</Link></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-white font-bold mb-8 uppercase tracking-widest text-xs">Sede Central</h4>
+                            <h4 className="text-white font-bold mb-8 uppercase tracking-widest text-xs">{t('footer.hq')}</h4>
                             <p className="text-sm mb-2 text-primary-300">Badajoz 100, Las Condes</p>
                             <p className="text-sm mb-6 text-primary-300">Santiago, Chile</p>
                             <a href="https://wa.me/56988198559" className="inline-flex items-center gap-2 text-accent-500 font-bold hover:text-accent-400 transition">
                                 <span className="size-2 bg-accent-500 rounded-full animate-pulse"></span>
-                                Soporte Directo
+                                {t('footer.support')}
                             </a>
                         </div>
                     </div>
@@ -251,8 +282,8 @@ export default function PublicLayout({ children, auth }) {
                     {/* Newsletter */}
                     <div className="mt-16 pt-8 border-t border-white/5">
                         <div className="max-w-xl mx-auto text-center">
-                            <h4 className="text-white font-display font-medium text-lg mb-2">Mantente Informado</h4>
-                            <p className="text-primary-400 text-sm mb-4">Recibe novedades sobre productos, ofertas y tecnología.</p>
+                            <h4 className="text-white font-display font-medium text-lg mb-2">{t('footer.newsletter')}</h4>
+                            <p className="text-primary-400 text-sm mb-4">{t('footer.newsletterDesc')}</p>
                             <NewsletterForm />
                         </div>
                     </div>

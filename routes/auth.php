@@ -8,10 +8,16 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
+    // Social Login
+    Route::get('auth/{provider}/redirect', [SocialLoginController::class, 'redirect'])->name('social.redirect');
+    Route::get('auth/{provider}/callback', [SocialLoginController::class, 'callback'])->name('social.callback');
+
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
@@ -53,6 +59,11 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+
+    // Two-Factor Authentication
+    Route::get('two-factor', [TwoFactorController::class, 'index'])->name('two-factor.index');
+    Route::post('two-factor', [TwoFactorController::class, 'verify'])->name('two-factor.verify');
+    Route::post('two-factor/resend', [TwoFactorController::class, 'resend'])->name('two-factor.resend');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

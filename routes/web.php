@@ -7,12 +7,24 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Home');
+    $banners = [];
+    $featuredProducts = [];
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('banners')) {
+            $banners = \App\Models\Banner::where('is_active', true)->orderBy('sort_order')->get();
+        }
+        $featuredProducts = \App\Models\Product::where('stock', '>', 0)->latest()->take(8)->get();
+    } catch (\Exception $e) {}
+    return Inertia::render('Home', [
+        'banners' => $banners,
+        'featuredProducts' => $featuredProducts,
+    ]);
 })->name('home');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/catalog', [\App\Http\Controllers\CatalogController::class, 'index'])->name('catalog');
+Route::get('/catalog/compare', [\App\Http\Controllers\CatalogController::class, 'compare'])->name('compare');
 Route::get('/catalog/{product:slug}', [\App\Http\Controllers\CatalogController::class, 'show'])->name('product.show');
 
 Route::get('/about', function () {
@@ -27,6 +39,16 @@ Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'
 // Newsletter
 Route::post('/newsletter/subscribe', [\App\Http\Controllers\NewsletterController::class, 'subscribe'])->middleware('throttle:5,1')->name('newsletter.subscribe');
 Route::get('/newsletter/unsubscribe/{email}', [\App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
+// Stock Notification
+Route::post('/stock-notification', [\App\Http\Controllers\StockNotificationController::class, 'store'])->middleware('throttle:5,1')->name('stock.notify');
+
+// FAQ
+Route::get('/faq', [\App\Http\Controllers\FaqController::class, 'index'])->name('faq');
+
+// Blog
+Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{post:slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
 
 // Order Tracking (public)
 Route::get('/tracking', [\App\Http\Controllers\OrderTrackingController::class, 'index'])->name('tracking');
@@ -57,6 +79,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
     // Products
+    Route::get('/products/export-csv', [\App\Http\Controllers\Admin\ProductController::class, 'exportCsv'])->name('products.export-csv');
+    Route::post('/products/import-csv', [\App\Http\Controllers\Admin\ProductController::class, 'importCsv'])->name('products.import-csv');
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->names('products');
 
     // Shipping
@@ -82,6 +106,40 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/coupons', [\App\Http\Controllers\Admin\CouponController::class, 'store'])->name('coupons.store');
     Route::patch('/coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'destroy'])->name('coupons.destroy');
+
+    // Blog (Admin)
+    Route::get('/blog', [\App\Http\Controllers\Admin\BlogPostController::class, 'index'])->name('blog.index');
+    Route::get('/blog/create', [\App\Http\Controllers\Admin\BlogPostController::class, 'create'])->name('blog.create');
+    Route::post('/blog', [\App\Http\Controllers\Admin\BlogPostController::class, 'store'])->name('blog.store');
+    Route::get('/blog/{post}/edit', [\App\Http\Controllers\Admin\BlogPostController::class, 'edit'])->name('blog.edit');
+    Route::put('/blog/{post}', [\App\Http\Controllers\Admin\BlogPostController::class, 'update'])->name('blog.update');
+    Route::delete('/blog/{post}', [\App\Http\Controllers\Admin\BlogPostController::class, 'destroy'])->name('blog.destroy');
+
+    // Banners (Admin)
+    Route::get('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('banners.index');
+    Route::post('/banners', [\App\Http\Controllers\Admin\BannerController::class, 'store'])->name('banners.store');
+    Route::put('/banners/{banner}', [\App\Http\Controllers\Admin\BannerController::class, 'update'])->name('banners.update');
+    Route::delete('/banners/{banner}', [\App\Http\Controllers\Admin\BannerController::class, 'destroy'])->name('banners.destroy');
+
+    // Returns (Admin)
+    Route::get('/returns', [\App\Http\Controllers\Admin\ReturnController::class, 'index'])->name('returns.index');
+    Route::patch('/returns/{returnRequest}/status', [\App\Http\Controllers\Admin\ReturnController::class, 'updateStatus'])->name('returns.updateStatus');
+
+    // Reports (Admin)
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+
+    // Facturación Electrónica (Admin)
+    Route::get('/dte', [\App\Http\Controllers\Admin\DteController::class, 'index'])->name('dte.index');
+
+    // Notifications API (Admin polling)
+    Route::get('/notifications', function () {
+        return response()->json([
+            'new_orders' => \App\Models\Order::where('status', 'pending')->where('created_at', '>=', now()->subHours(24))->count(),
+            'new_quotes' => \App\Models\Quote::where('status', 'pending')->where('created_at', '>=', now()->subHours(24))->count(),
+            'new_messages' => \App\Models\ContactMessage::whereNull('admin_reply')->count(),
+            'low_stock' => \App\Models\Product::where('stock', '>', 0)->where('stock', '<=', 5)->count(),
+        ]);
+    })->name('notifications');
 });
 
 // Dashboard - redirects admin to admin dashboard
@@ -111,6 +169,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/two-factor', [ProfileController::class, 'toggleTwoFactor'])->name('profile.two-factor');
+    Route::delete('/profile/sessions', [ProfileController::class, 'destroyOtherSessions'])->name('profile.sessions.destroy');
 
     // My Orders
     Route::get('/my-orders', [\App\Http\Controllers\MyOrderController::class, 'index'])->name('my-orders.index');
@@ -123,6 +183,19 @@ Route::middleware('auth')->group(function () {
     // PDF Downloads
     Route::get('/pdf/order/{order}', [\App\Http\Controllers\PdfController::class, 'order'])->name('pdf.order');
     Route::get('/pdf/quote/{quote}', [\App\Http\Controllers\PdfController::class, 'quote'])->name('pdf.quote');
+
+    // Wishlist
+    Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/{product}', [\App\Http\Controllers\WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{product}', [\App\Http\Controllers\WishlistController::class, 'remove'])->name('wishlist.remove');
+
+    // Reviews
+    Route::post('/reviews/{product}', [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+
+    // Return Requests (Client)
+    Route::get('/returns', [\App\Http\Controllers\ReturnRequestController::class, 'index'])->name('returns.index');
+    Route::get('/returns/create/{order}', [\App\Http\Controllers\ReturnRequestController::class, 'create'])->name('returns.create');
+    Route::post('/returns', [\App\Http\Controllers\ReturnRequestController::class, 'store'])->name('returns.store');
 });
 
 require __DIR__ . '/auth.php';

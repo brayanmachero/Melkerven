@@ -19,14 +19,18 @@ class ActivityLog extends Model
 
     public static function log($action, $description, $subject = null, $properties = null)
     {
-        return static::create([
-            'user_id' => auth()->id(),
-            'action' => $action,
-            'subject_type' => $subject ? get_class($subject) : null,
-            'subject_id' => $subject?->id,
-            'description' => $description,
-            'properties' => $properties,
-            'ip_address' => request()->ip(),
-        ]);
+        try {
+            return static::create([
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'subject_type' => $subject ? get_class($subject) : null,
+                'subject_id' => $subject?->id,
+                'description' => $description,
+                'properties' => $properties,
+                'ip_address' => request()->ip(),
+            ]);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

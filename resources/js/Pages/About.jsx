@@ -65,7 +65,7 @@ export default function About({ auth }) {
                         ].map((card, i) => (
                             <div key={i} className="tech-card h-full">
                                 <div className="text-4xl mb-6">{card.icon}</div>
-                                <h3 className="text-xl font-bold text-white mb-4 uppercase tracking-tighter tracking-tighter">{card.title}</h3>
+                                <h3 className="text-xl font-bold text-white mb-4 uppercase tracking-tighter">{card.title}</h3>
                                 <p className="text-primary-400 text-sm leading-relaxed font-light">{card.desc}</p>
                             </div>
                         ))}

@@ -13,7 +13,7 @@ class NewsletterController extends Controller
             'email' => 'required|email|max:255',
         ]);
 
-        $subscriber = Subscriber::withTrashed ?? Subscriber::where('email', $request->email)->first();
+        $subscriber = Subscriber::where('email', $request->email)->first();
 
         if ($subscriber) {
             if ($subscriber->is_active) {

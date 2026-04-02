@@ -1,11 +1,30 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const { auth, unread_messages } = usePage().props;
     const user = auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [notifications, setNotifications] = useState(null);
+
+    // Poll for notifications (admin only)
+    useEffect(() => {
+        if (user.role !== 'admin') return;
+        const fetchNotifications = () => {
+            fetch(route('admin.notifications'))
+                .then(res => res.json())
+                .then(data => setNotifications(data))
+                .catch(() => {});
+        };
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 60000); // every 60s
+        return () => clearInterval(interval);
+    }, [user.role]);
+
+    const totalAlerts = notifications
+        ? notifications.new_orders + notifications.new_quotes + notifications.new_messages + notifications.low_stock
+        : 0;
 
     const navLinks = user.role === 'admin' ? [
         { href: route('admin.dashboard'), label: 'Resumen', active: route().current('admin.dashboard') || route().current('dashboard') },
@@ -14,12 +33,19 @@ export default function AuthenticatedLayout({ header, children }) {
         { href: route('admin.orders.index'), label: 'Pedidos', active: route().current('admin.orders.*') },
         { href: route('admin.quotes.index'), label: 'Cotizaciones', active: route().current('admin.quotes.*') },
         { href: route('admin.messages.index'), label: unread_messages > 0 ? `Mensajes (${unread_messages})` : 'Mensajes', active: route().current('admin.messages.*') },
+        { href: route('admin.coupons.index'), label: 'Cupones', active: route().current('admin.coupons.*') },
+        { href: route('admin.blog.index'), label: 'Blog', active: route().current('admin.blog.*') },
+        { href: route('admin.banners.index'), label: 'Banners', active: route().current('admin.banners.*') },
+        { href: route('admin.returns.index'), label: 'Devoluciones', active: route().current('admin.returns.*') },
+        { href: route('admin.reports.index'), label: 'Reportes', active: route().current('admin.reports.*') },
         { href: route('admin.users.index'), label: 'Usuarios', active: route().current('admin.users.*') },
         { href: route('admin.shipping.index'), label: 'Logística', active: route().current('admin.shipping.*') },
     ] : [
         { href: route('dashboard'), label: 'Mi Panel', active: route().current('dashboard') },
         { href: route('my-orders.index'), label: 'Mis Pedidos', active: route().current('my-orders.*') },
         { href: route('my-quotes.index'), label: 'Mis Cotizaciones', active: route().current('my-quotes.*') },
+        { href: route('wishlist.index'), label: 'Favoritos', active: route().current('wishlist.*') },
+        { href: route('returns.index'), label: 'Devoluciones', active: route().current('returns.*') },
     ];
 
     return (
@@ -55,8 +81,35 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
-                        {/* Right side: user menu */}
+                        {/* Right side: notifications + user menu */}
                         <div className="hidden md:flex items-center gap-4">
+                            {/* Notification Bell (admin only) */}
+                            {user.role === 'admin' && (
+                                <div className="relative group">
+                                    <Link
+                                        href={route('admin.dashboard')}
+                                        className="relative size-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-primary-400 hover:text-white hover:bg-white/10 transition-all"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                        {totalAlerts > 0 && (
+                                            <span className="absolute -top-1 -right-1 size-5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-2 ring-primary-950">
+                                                {totalAlerts > 9 ? '9+' : totalAlerts}
+                                            </span>
+                                        )}
+                                    </Link>
+                                    {notifications && totalAlerts > 0 && (
+                                        <div className="absolute right-0 mt-2 w-64 bg-primary-900/95 border border-white/10 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 p-3 space-y-2">
+                                            {notifications.new_orders > 0 && <p className="text-xs text-primary-300">{notifications.new_orders} pedido(s) nuevo(s)</p>}
+                                            {notifications.new_quotes > 0 && <p className="text-xs text-primary-300">{notifications.new_quotes} cotización(es) nueva(s)</p>}
+                                            {notifications.new_messages > 0 && <p className="text-xs text-primary-300">{notifications.new_messages} mensaje(s) sin responder</p>}
+                                            {notifications.low_stock > 0 && <p className="text-xs text-yellow-400">{notifications.low_stock} producto(s) con stock bajo</p>}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <Link
                                 href={route('home')}
                                 className="text-[10px] font-bold uppercase tracking-widest text-primary-500 hover:text-accent-400 transition-colors px-3 py-2"

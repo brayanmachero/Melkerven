@@ -1,9 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 export default function Index({ auth, products, categories, filters }) {
     const { delete: destroy, processing } = useForm();
+    const { post: importCsv, processing: importing } = useForm({});
+    const csvInputRef = useRef(null);
     const [search, setSearch] = useState(filters?.search || '');
     const [categoryId, setCategoryId] = useState(filters?.category_id || '');
     const [isActive, setIsActive] = useState(filters?.is_active ?? '');
@@ -36,12 +38,40 @@ export default function Index({ auth, products, categories, filters }) {
                     <h2 className="text-3xl font-display font-medium text-white tracking-tight leading-tight">
                         Gestión de <span className="text-accent-500">Productos</span>
                     </h2>
-                    <Link
-                        href={route('admin.products.create')}
-                        className="btn-premium bg-accent-500 text-white hover:bg-accent-600 px-6 py-2.5 shadow-2xl shadow-accent-500/20"
-                    >
-                        + Nuevo Producto
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        <a
+                            href={route('admin.products.export-csv')}
+                            className="px-4 py-2.5 rounded-lg border border-white/10 bg-white/5 text-primary-300 hover:bg-white/10 hover:text-white transition-all text-[10px] font-bold uppercase tracking-widest"
+                        >
+                            ↓ Exportar CSV
+                        </a>
+                        <button
+                            onClick={() => csvInputRef.current?.click()}
+                            disabled={importing}
+                            className="px-4 py-2.5 rounded-lg border border-white/10 bg-white/5 text-primary-300 hover:bg-white/10 hover:text-white transition-all text-[10px] font-bold uppercase tracking-widest disabled:opacity-50"
+                        >
+                            {importing ? 'Importando...' : '↑ Importar CSV'}
+                        </button>
+                        <input
+                            ref={csvInputRef}
+                            type="file"
+                            accept=".csv"
+                            className="hidden"
+                            onChange={(e) => {
+                                if (e.target.files[0]) {
+                                    const formData = new FormData();
+                                    formData.append('csv_file', e.target.files[0]);
+                                    router.post(route('admin.products.import-csv'), formData);
+                                }
+                            }}
+                        />
+                        <Link
+                            href={route('admin.products.create')}
+                            className="btn-premium bg-accent-500 text-white hover:bg-accent-600 px-6 py-2.5 shadow-2xl shadow-accent-500/20"
+                        >
+                            + Nuevo Producto
+                        </Link>
+                    </div>
                 </div>
             }
         >

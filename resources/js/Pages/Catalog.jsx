@@ -3,9 +3,17 @@ import Breadcrumbs from '@/Components/Breadcrumbs';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Catalog({ auth, products, categories, filters }) {
+export default function Catalog({ auth, products, categories, filters, wishlistIds = [] }) {
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [addingToCart, setAddingToCart] = useState(null);
+    const [compareIds, setCompareIds] = useState([]);
+    const [localWishlist, setLocalWishlist] = useState(wishlistIds);
+
+    const toggleCompare = (id) => {
+        setCompareIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : prev.length < 4 ? [...prev, id] : prev
+        );
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -22,6 +30,15 @@ export default function Catalog({ auth, products, categories, filters }) {
             preserveScroll: true,
             onFinish: () => setAddingToCart(null),
         });
+    };
+
+    const toggleWishlist = (productId) => {
+        if (!auth?.user) {
+            router.visit(route('login'));
+            return;
+        }
+        setLocalWishlist(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
+        router.post(route('wishlist.toggle', productId), {}, { preserveScroll: true });
     };
     return (
         <PublicLayout auth={auth}>
@@ -154,6 +171,24 @@ export default function Catalog({ auth, products, categories, filters }) {
                                             {product.category?.name || 'OEM'}
                                         </span>
                                     </div>
+                                    <button
+                                        onClick={(e) => { e.preventDefault(); toggleCompare(product.id); }}
+                                        className={`absolute top-3 left-3 size-7 rounded-lg border flex items-center justify-center transition-all ${compareIds.includes(product.id) ? 'bg-accent-500 border-accent-500 text-white' : 'bg-primary-950/80 border-white/10 text-primary-500 hover:border-accent-500 hover:text-accent-400'}`}
+                                        title="Comparar"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.preventDefault(); toggleWishlist(product.id); }}
+                                        className={`absolute bottom-3 right-3 size-7 rounded-lg border flex items-center justify-center transition-all ${localWishlist.includes(product.id) ? 'bg-red-500/20 border-red-500/50 text-red-400' : 'bg-primary-950/80 border-white/10 text-primary-500 hover:border-red-500/30 hover:text-red-400'}`}
+                                        title="Favoritos"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="size-3.5" fill={localWishlist.includes(product.id) ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
                                 </div>
 
                                 <div className="flex-grow flex flex-col">
@@ -238,7 +273,7 @@ export default function Catalog({ auth, products, categories, filters }) {
                     {products.data.length === 0 && (
                         <div className="mt-20 py-32 tech-card border-dashed border-primary-800 bg-transparent text-center">
                             <div className="text-6xl mb-8 opacity-40">🔍</div>
-                            <h3 className="text-3xl font-display font-medium text-white mb-4">Módulo de Suministro Vacío</h3>
+                            <h3 className="text-3xl font-display font-medium text-white mb-4">No se encontraron productos</h3>
                             <p className="text-primary-400 mb-12 max-w-md mx-auto font-light">
                                 Estamos sincronizando el inventario global. Si requiere un componente específico, inicie una solicitud de importación.
                             </p>
@@ -281,6 +316,32 @@ export default function Catalog({ auth, products, categories, filters }) {
                         </div>
                     </div>
                 </div>
+
+                {/* Floating Compare Bar */}
+                {compareIds.length > 0 && (
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-primary-900/95 backdrop-blur-xl border border-accent-500/30 rounded-2xl px-6 py-4 flex items-center gap-4 shadow-2xl shadow-black/50">
+                        <div className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="size-5 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span className="text-xs font-bold uppercase tracking-widest text-white">{compareIds.length} de 4</span>
+                        </div>
+                        <Link
+                            href={route('compare', { ids: compareIds.join(',') })}
+                            className="px-6 py-2.5 bg-accent-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-accent-600 transition-all"
+                        >
+                            Comparar Ahora
+                        </Link>
+                        <button
+                            onClick={() => setCompareIds([])}
+                            className="text-primary-500 hover:text-red-400 transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
             </section>
         </PublicLayout>
     );

@@ -53,17 +53,22 @@ class DashboardController extends Controller
             ]);
 
         // Recent activity
-        $recentActivity = \App\Models\ActivityLog::with('user')
-            ->latest()
-            ->limit(10)
-            ->get()
-            ->map(fn ($a) => [
-                'id' => $a->id,
-                'user' => $a->user?->name ?? 'Sistema',
-                'action' => $a->action,
-                'description' => $a->description,
-                'created_at' => $a->created_at->diffForHumans(),
-            ]);
+        $recentActivity = [];
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('activity_logs')) {
+                $recentActivity = \App\Models\ActivityLog::with('user')
+                    ->latest()
+                    ->limit(10)
+                    ->get()
+                    ->map(fn ($a) => [
+                        'id' => $a->id,
+                        'user' => $a->user?->name ?? 'Sistema',
+                        'action' => $a->action,
+                        'description' => $a->description,
+                        'created_at' => $a->created_at->diffForHumans(),
+                    ]);
+            }
+        } catch (\Exception $e) {}
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [

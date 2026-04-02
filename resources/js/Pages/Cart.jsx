@@ -100,7 +100,7 @@ export default function Cart({ auth, cart, subtotal, shippingRates }) {
 
     return (
         <PublicLayout auth={auth}>
-            <Head title="Módulo de Adquisición - Detalle de Orden" />
+            <Head title="Carrito de Compras" />
 
             <section className="py-20 bg-primary-950 min-h-screen relative overflow-hidden">
                 <div className="absolute top-0 right-0 size-[500px] bg-accent-500/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
@@ -112,7 +112,7 @@ export default function Cart({ auth, cart, subtotal, shippingRates }) {
                             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent-500">Logística y Facturación</span>
                         </div>
                         <h1 className="text-4xl sm:text-6xl font-display font-medium text-white tracking-tighter">
-                            Finalizar <span className="text-accent-500 font-light italic">Adquisición</span>
+                            Finalizar <span className="text-accent-500 font-light italic">Compra</span>
                         </h1>
                     </div>
 
@@ -462,7 +462,7 @@ export default function Cart({ auth, cart, subtotal, shippingRates }) {
                             <div className="text-6xl mb-8 opacity-40">🛒</div>
                             <h3 className="text-3xl font-display font-medium text-white mb-4">No hay suministros pendientes</h3>
                             <p className="text-primary-400 mb-12 max-w-md mx-auto font-light">
-                                Su módulo de adquisición está vacío. Explore nuestro catálogo técnico para añadir componentes críticos.
+                                Tu carrito está vacío. Explora nuestro catálogo para encontrar los productos que necesitas.
                             </p>
                             <Link
                                 href={route('catalog')}

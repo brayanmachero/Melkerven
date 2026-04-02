@@ -18,10 +18,66 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $sessions = [];
+        if (config('session.driver') === 'database') {
+            $sessions = \DB::table('sessions')
+                ->where('user_id', $request->user()->id)
+                ->orderByDesc('last_activity')
+                ->get()
+                ->map(function ($session) use ($request) {
+                    $agent = new \Jenssegers\Agent\Agent();
+                    return (object) [
+                        'id' => $session->id,
+                        'ip_address' => $session->ip_address,
+                        'user_agent' => $session->user_agent,
+                        'is_current' => $session->id === $request->session()->getId(),
+                        'last_active' => \Carbon\Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
+                    ];
+                });
+        }
+
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'sessions' => $sessions,
         ]);
+    }
+
+    /**
+     * Toggle two-factor authentication for the user.
+     */
+    public function toggleTwoFactor(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $user->two_factor_enabled = !$user->two_factor_enabled;
+        $user->save();
+
+        // Clear existing 2FA state
+        if (!$user->two_factor_enabled) {
+            $user->resetTwoFactorCode();
+            session()->forget('two_factor_verified');
+        }
+
+        return Redirect::route('profile.edit')->with('status',
+            $user->two_factor_enabled
+                ? 'Autenticación de dos factores activada.'
+                : 'Autenticación de dos factores desactivada.'
+        );
+    }
+
+    /**
+     * Invalidate other sessions.
+     */
+    public function destroyOtherSessions(Request $request): RedirectResponse
+    {
+        $request->validate(['password' => ['required', 'current_password']]);
+
+        \DB::table('sessions')
+            ->where('user_id', $request->user()->id)
+            ->where('id', '!=', $request->session()->getId())
+            ->delete();
+
+        return Redirect::route('profile.edit')->with('status', 'Otras sesiones cerradas correctamente.');
     }
 
     /**
