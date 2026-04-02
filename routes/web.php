@@ -131,6 +131,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Facturación Electrónica (Admin)
     Route::get('/dte', [\App\Http\Controllers\Admin\DteController::class, 'index'])->name('dte.index');
 
+    // Newsletter (Admin)
+    Route::get('/newsletter', [\App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('newsletter.index');
+    Route::post('/newsletter/send', [\App\Http\Controllers\Admin\NewsletterController::class, 'send'])->name('newsletter.send');
+    Route::delete('/newsletter/{subscriber}', [\App\Http\Controllers\Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+
     // Notifications API (Admin polling)
     Route::get('/notifications', function () {
         return response()->json([
@@ -194,7 +199,7 @@ Route::middleware('auth')->group(function () {
 
     // Return Requests (Client)
     Route::get('/returns', [\App\Http\Controllers\ReturnRequestController::class, 'index'])->name('returns.index');
-    Route::get('/returns/create/{order}', [\App\Http\Controllers\ReturnRequestController::class, 'create'])->name('returns.create');
+    Route::get('/returns/create', [\App\Http\Controllers\ReturnRequestController::class, 'create'])->name('returns.create');
     Route::post('/returns', [\App\Http\Controllers\ReturnRequestController::class, 'store'])->name('returns.store');
 });
 

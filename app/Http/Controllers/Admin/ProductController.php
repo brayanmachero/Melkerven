@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
+use App\Traits\OptimizesImages;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    use OptimizesImages;
     public function index(Request $request)
     {
         $query = Product::with('category')->latest();
@@ -75,15 +77,14 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $validated['image_path'] = $path;
+            $validated['image_path'] = $this->optimizeAndStore($request->file('image'), 'products');
         }
 
         // Handle additional gallery images
         if ($request->hasFile('additional_images')) {
             $imagePaths = [];
             foreach ($request->file('additional_images') as $img) {
-                $imagePaths[] = $img->store('products', 'public');
+                $imagePaths[] = $this->optimizeAndStore($img, 'products');
             }
             $validated['images'] = $imagePaths;
         }
