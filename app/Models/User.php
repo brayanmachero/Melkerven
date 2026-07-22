@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Mail\TwoFactorCode;
 
 class User extends Authenticatable
@@ -27,6 +28,11 @@ class User extends Authenticatable
         'phone',
         'rut',
         'two_factor_enabled',
+        'mail_signature_html',
+        'mail_signature_text',
+        'mail_in_app_notifications',
+        'mail_desktop_notifications',
+        'mail_sound_notifications',
     ];
 
     /**
@@ -79,6 +85,22 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'mail_in_app_notifications' => 'boolean',
+            'mail_desktop_notifications' => 'boolean',
+            'mail_sound_notifications' => 'boolean',
         ];
+    }
+
+    public function mailAlerts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(MailAlert::class);
+    }
+
+    public function mailAccounts(): BelongsToMany
+    {
+        return $this->belongsToMany(MailAccount::class)
+            ->using(MailAccountMembership::class)
+            ->withPivot(['access_role', 'can_send', 'can_manage'])
+            ->withTimestamps();
     }
 }

@@ -13,6 +13,8 @@ export default function AuthenticatedLayout({ header, children }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
     const [notifications, setNotifications] = useState(null);
+    const [alertsOpen, setAlertsOpen] = useState(false);
+    const [seenMailAlertIds, setSeenMailAlertIds] = useState([]);
 
     useEffect(() => {
         if (user.role !== 'admin') return;
@@ -27,8 +29,56 @@ export default function AuthenticatedLayout({ header, children }) {
         return () => clearInterval(interval);
     }, [user.role]);
 
+    useEffect(() => {
+        const alerts = notifications?.mail_alerts || [];
+        const newAlerts = alerts.filter(alert => !seenMailAlertIds.includes(alert.id));
+
+        if (seenMailAlertIds.length > 0 && newAlerts.length > 0) {
+            const latest = newAlerts[0];
+            const settings = notifications.mail_notification_settings || {};
+
+            if (settings.desktop && 'Notification' in window && Notification.permission === 'granted') {
+                new Notification(latest.title, { body: latest.body || 'Tienes un nuevo correo en Melkerven.' });
+            }
+
+            if (settings.sound) {
+                try {
+                    const context = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = context.createOscillator();
+                    const gain = context.createGain();
+                    oscillator.connect(gain);
+                    gain.connect(context.destination);
+                    oscillator.frequency.value = 880;
+                    gain.gain.setValueAtTime(0.025, context.currentTime);
+                    oscillator.start();
+                    oscillator.stop(context.currentTime + 0.12);
+                } catch (_) {
+                    // Algunos navegadores exigen una interacción previa antes de reproducir sonido.
+                }
+            }
+        }
+
+        setSeenMailAlertIds(alerts.map(alert => alert.id));
+    }, [notifications]);
+
+    const markMailAlertsAsSeen = () => {
+        fetch(route('admin.mail.alerts.read-all'), {
+            method: 'PATCH',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+        }).then(() => {
+            setNotifications(current => current ? {
+                ...current,
+                new_mail: 0,
+                mail_alerts: current.mail_alerts.map(alert => ({ ...alert, read_at: alert.read_at || new Date().toISOString() })),
+            } : current);
+        }).catch(() => {});
+    };
+
     const totalAlerts = notifications
-        ? notifications.new_orders + notifications.new_quotes + notifications.new_messages + notifications.low_stock
+        ? notifications.new_orders + notifications.new_quotes + notifications.new_messages + notifications.new_mail + notifications.low_stock
         : 0;
 
     const adminSections = [
@@ -47,6 +97,8 @@ export default function AuthenticatedLayout({ header, children }) {
         ]},
         { heading: 'Comunicación', items: [
             { href: route('admin.messages.index'), label: 'Mensajes', active: route().current('admin.messages.*'), icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', badge: notifications?.new_messages || (unread_messages > 0 ? unread_messages : 0) },
+            { href: route('admin.mail.index'), label: 'Correo', active: route().current('admin.mail.*') && !route().current('admin.mail.accounts.*'), icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', badge: notifications?.new_mail },
+            { href: route('admin.mail.accounts.index'), label: 'Buzones', active: route().current('admin.mail.accounts.*'), icon: 'M4 4h16v16H4V4zm3 4h10M7 12h10m-10 4h6' },
             { href: route('admin.blog.index'), label: 'Blog', active: route().current('admin.blog.*'), icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
             { href: route('admin.newsletter.index'), label: 'Newsletter', active: route().current('admin.newsletter.*'), icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
         ]},
@@ -234,10 +286,12 @@ export default function AuthenticatedLayout({ header, children }) {
                         {/* Right side: notifications */}
                         <div className="flex items-center gap-3">
                             {user.role === 'admin' && totalAlerts > 0 && (
-                                <div className="relative group">
-                                    <Link
-                                        href={route('admin.dashboard')}
-                                        className="relative size-9 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-primary-400 hover:text-white hover:bg-white/10 transition-all"
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        onClick={() => setAlertsOpen(!alertsOpen)}
+                                        aria-expanded={alertsOpen}
+                                        className="relative flex size-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-primary-400 transition-all hover:bg-white/10 hover:text-white"
                                     >
                                         <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -245,13 +299,24 @@ export default function AuthenticatedLayout({ header, children }) {
                                         <span className="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
                                             {totalAlerts > 9 ? '9+' : totalAlerts}
                                         </span>
-                                    </Link>
-                                    <div className="absolute right-0 mt-2 w-60 bg-primary-900/95 border border-white/10 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 p-3 space-y-1.5">
+                                    </button>
+                                    {alertsOpen && <div className="absolute right-0 z-50 mt-2 w-80 rounded-xl border border-white/10 bg-primary-900/95 p-3 shadow-2xl backdrop-blur">
+                                        <div className="mb-3 flex items-center justify-between">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-white">Alertas</p>
+                                            {notifications?.new_mail > 0 && <button type="button" onClick={markMailAlertsAsSeen} className="text-[9px] font-bold uppercase tracking-wider text-accent-400 hover:text-white">Ver correos</button>}
+                                        </div>
                                         {notifications?.new_orders > 0 && <p className="text-xs text-primary-300">📦 {notifications.new_orders} pedido(s) nuevo(s)</p>}
                                         {notifications?.new_quotes > 0 && <p className="text-xs text-primary-300">📋 {notifications.new_quotes} cotización(es)</p>}
                                         {notifications?.new_messages > 0 && <p className="text-xs text-primary-300">📧 {notifications.new_messages} mensaje(s)</p>}
+                                        {notifications?.new_mail > 0 && <p className="text-xs text-primary-300">✉️ {notifications.new_mail} correo(s) pendiente(s)</p>}
                                         {notifications?.low_stock > 0 && <p className="text-xs text-yellow-400">⚠️ {notifications.low_stock} stock bajo</p>}
-                                    </div>
+                                        {notifications?.mail_alerts?.length > 0 && <div className="mt-3 space-y-1 border-t border-white/5 pt-3">
+                                            {notifications.mail_alerts.map(alert => <Link key={alert.id} href={alert.url || route('admin.mail.index')} onClick={() => setAlertsOpen(false)} className={`block rounded-lg px-2.5 py-2 transition hover:bg-white/5 ${alert.read_at ? 'text-primary-500' : 'bg-accent-500/[0.06] text-primary-200'}`}>
+                                                <p className="truncate text-[10px] font-semibold">{alert.title}</p>
+                                                {alert.body && <p className="mt-1 truncate text-[9px] text-primary-500">{alert.body}</p>}
+                                            </Link>)}
+                                        </div>}
+                                    </div>}
                                 </div>
                             )}
                         </div>

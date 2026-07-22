@@ -1,12 +1,14 @@
 {
-    "name": "Melkerven - Servers, Networking & Storage Hardware",
-    "short_name": "Melkerven",
-    "description": "Infraestructura tecnológica de alto nivel. Servidores, networking y almacenamiento.",
-    "start_url": "/",
+    "id": "/admin/mail",
+    "name": "Melkerven Mail",
+    "short_name": "Melkerven Mail",
+    "description": "Bandeja de comunicaciones de Melkerven.",
+    "start_url": "/admin/mail",
+    "scope": "/admin/",
     "display": "standalone",
     "background_color": "#0b1120",
     "theme_color": "#0ea5e9",
-    "orientation": "portrait-primary",
+    "orientation": "any",
     "icons": [
         {
             "src": "/images/logo-light.png",
@@ -17,6 +19,19 @@
             "src": "/images/logo-light.png",
             "sizes": "512x512",
             "type": "image/png"
+        }
+    ],
+    "categories": ["business", "productivity"],
+    "shortcuts": [
+        {
+            "name": "Abrir correo",
+            "short_name": "Correo",
+            "url": "/admin/mail"
+        },
+        {
+            "name": "Redactar correo",
+            "short_name": "Redactar",
+            "url": "/admin/mail?compose=1"
         }
     ]
 }

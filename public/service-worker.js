@@ -1,38 +1,53 @@
-const CACHE_NAME = 'melkerven-v1';
-const urlsToCache = ['/', '/catalog', '/about', '/contact', '/blog', '/faq'];
+const CACHE_NAME = 'melkerven-public-shell-v2';
+const PUBLIC_ASSETS = [
+    '/offline.html',
+    '/manifest.json',
+    '/images/logo-light.png',
+];
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
-    );
-});
-
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            if (response) return response;
-            return fetch(event.request).then((response) => {
-                if (!response || response.status !== 200 || response.type !== 'basic') return response;
-                const responseToCache = response.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseToCache);
-                });
-                return response;
-            }).catch(() => {
-                if (event.request.destination === 'document') {
-                    return caches.match('/');
-                }
-            });
-        })
-    );
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PUBLIC_ASSETS)));
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
-            );
-        })
+        caches.keys().then((keys) => Promise.all(
+            keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)),
+        )),
     );
+    self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+    const request = event.request;
+    const url = new URL(request.url);
+
+    if (request.method !== 'GET' || url.origin !== self.location.origin) {
+        return;
+    }
+
+    // Mail, admin and authentication responses can contain private data.
+    // They must never be retained by the browser cache or available offline.
+    if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/login') || url.pathname.startsWith('/register')) {
+        event.respondWith(fetch(request));
+        return;
+    }
+
+    if (request.destination === 'document') {
+        event.respondWith(fetch(request).catch(() => caches.match('/offline.html')));
+        return;
+    }
+
+    if (url.pathname.startsWith('/build/') || url.pathname.startsWith('/images/')) {
+        event.respondWith(
+            caches.match(request).then((cached) => cached || fetch(request).then((response) => {
+                if (response.ok) {
+                    caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+                }
+
+                return response;
+            })),
+        );
+    }
 });

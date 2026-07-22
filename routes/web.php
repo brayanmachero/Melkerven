@@ -97,6 +97,32 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/messages/{message}', [\App\Http\Controllers\Admin\ContactMessageController::class, 'show'])->name('messages.show');
     Route::post('/messages/{message}/reply', [\App\Http\Controllers\Admin\ContactMessageController::class, 'reply'])->name('messages.reply');
 
+    // Internal mailbox (Resend inbound emails are received at /resend/webhook)
+    Route::get('/mail', [\App\Http\Controllers\Admin\MailboxController::class, 'index'])->name('mail.index');
+    Route::get('/mail-accounts', [\App\Http\Controllers\Admin\MailAccountController::class, 'index'])->name('mail.accounts.index');
+    Route::post('/mail-accounts', [\App\Http\Controllers\Admin\MailAccountController::class, 'store'])->name('mail.accounts.store');
+    Route::put('/mail-accounts/{account}', [\App\Http\Controllers\Admin\MailAccountController::class, 'update'])->name('mail.accounts.update');
+    Route::post('/mail-accounts/{account}/test', [\App\Http\Controllers\Admin\MailAccountController::class, 'test'])->name('mail.accounts.test');
+    Route::get('/mail-drafts', [\App\Http\Controllers\Admin\MailboxController::class, 'drafts'])->name('mail.drafts');
+    Route::post('/mail-drafts', [\App\Http\Controllers\Admin\MailboxController::class, 'saveDraft'])->name('mail.drafts.save');
+    Route::delete('/mail-drafts/{draft}', [\App\Http\Controllers\Admin\MailboxController::class, 'destroyDraft'])->name('mail.drafts.destroy');
+    Route::get('/mail-draft-attachments/{attachment}/download', [\App\Http\Controllers\Admin\MailboxController::class, 'downloadDraftAttachment'])->name('mail.drafts.attachments.download');
+    Route::get('/mail-files', [\App\Http\Controllers\Admin\MailboxController::class, 'files'])->name('mail.files');
+    Route::get('/mail-history', [\App\Http\Controllers\Admin\MailboxController::class, 'history'])->name('mail.history');
+    Route::post('/mail/send', [\App\Http\Controllers\Admin\MailboxController::class, 'send'])->name('mail.send');
+    Route::get('/mail/{thread}', [\App\Http\Controllers\Admin\MailboxController::class, 'show'])->name('mail.show');
+    Route::patch('/mail/{thread}/archive', [\App\Http\Controllers\Admin\MailboxController::class, 'archive'])->name('mail.archive');
+    Route::patch('/mail/{thread}/restore', [\App\Http\Controllers\Admin\MailboxController::class, 'restore'])->name('mail.restore');
+    Route::delete('/mail/{thread}/purge', [\App\Http\Controllers\Admin\MailboxController::class, 'purge'])->name('mail.purge');
+    Route::delete('/mail/{thread}', [\App\Http\Controllers\Admin\MailboxController::class, 'trash'])->name('mail.trash');
+    Route::get('/mail-attachments/{attachment}/download', [\App\Http\Controllers\Admin\MailboxController::class, 'downloadAttachment'])->name('mail.attachments.download');
+    Route::get('/mail-attachments/{attachment}/inline', [\App\Http\Controllers\Admin\MailboxController::class, 'inlineAttachment'])->name('mail.attachments.inline');
+    Route::get('/mail-settings', [\App\Http\Controllers\Admin\MailboxController::class, 'settings'])->name('mail.settings');
+    Route::patch('/mail-settings', [\App\Http\Controllers\Admin\MailboxController::class, 'updateSettings'])->name('mail.settings.update');
+    Route::get('/mail-alerts', [\App\Http\Controllers\Admin\MailboxController::class, 'alerts'])->name('mail.alerts');
+    Route::patch('/mail-alerts/read-all', [\App\Http\Controllers\Admin\MailboxController::class, 'markAllAlertsRead'])->name('mail.alerts.read-all');
+    Route::patch('/mail-alerts/{alert}/read', [\App\Http\Controllers\Admin\MailboxController::class, 'markAlertRead'])->name('mail.alerts.read');
+
     // Users (Admin)
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.updateRole');
@@ -137,12 +163,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/newsletter/{subscriber}', [\App\Http\Controllers\Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');
 
     // Notifications API (Admin polling)
-    Route::get('/notifications', function () {
+    Route::get('/notifications', function (\Illuminate\Http\Request $request) {
+        $mailAlerts = $request->user()->mailAlerts()->latest()->take(6)->get(['id', 'title', 'body', 'url', 'read_at', 'created_at']);
+
         return response()->json([
             'new_orders' => \App\Models\Order::where('status', 'pending')->where('created_at', '>=', now()->subHours(24))->count(),
             'new_quotes' => \App\Models\Quote::where('status', 'pending')->where('created_at', '>=', now()->subHours(24))->count(),
             'new_messages' => \App\Models\ContactMessage::whereNull('admin_reply')->count(),
+            'new_mail' => $request->user()->mailAlerts()->whereNull('read_at')->count(),
             'low_stock' => \App\Models\Product::where('stock', '>', 0)->where('stock', '<=', 5)->count(),
+            'mail_alerts' => $mailAlerts,
+            'mail_notification_settings' => [
+                'desktop' => (bool) $request->user()->mail_desktop_notifications,
+                'sound' => (bool) $request->user()->mail_sound_notifications,
+            ],
         ]);
     })->name('notifications');
 });

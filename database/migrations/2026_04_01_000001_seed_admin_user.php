@@ -1,34 +1,39 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        User::updateOrCreate(
-            ['email' => 'lsulca@melkerven.net'],
-            [
-                'name' => 'Lisbeth Sulca Torres',
-                'password' => Hash::make('Melkerven2026!'),
-                'role' => 'admin',
-            ]
-        );
+        $initialPassword = env('MELKERVEN_INITIAL_ADMIN_PASSWORD');
 
-        User::updateOrCreate(
-            ['email' => 'tvargas@melkerven.net'],
-            [
-                'name' => 'Teodoro Vargas Solorzano',
-                'password' => Hash::make('Melkerven2026!'),
-                'role' => 'admin',
-            ]
-        );
+        // Fresh installations may opt in to bootstrap these accounts. Existing
+        // installations keep their current credentials and never receive a
+        // password from source control.
+        if (! is_string($initialPassword) || $initialPassword === '') {
+            return;
+        }
+
+        foreach ([
+            ['email' => 'lsulca@melkerven.net', 'name' => 'Lisbeth Sulca Torres'],
+            ['email' => 'tvargas@melkerven.net', 'name' => 'Teodoro Vargas Solorzano'],
+        ] as $admin) {
+            User::updateOrCreate(
+                ['email' => $admin['email']],
+                [
+                    'name' => $admin['name'],
+                    'password' => Hash::make($initialPassword),
+                    'role' => 'admin',
+                ]
+            );
+        }
     }
 
     public function down(): void
     {
-        User::whereIn('email', ['lsulca@melkerven.net', 'tvargas@melkerven.net'])->delete();
+        // User accounts are business data and must never be deleted by a rollback.
     }
 };
