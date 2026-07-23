@@ -103,6 +103,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/mail-accounts', [\App\Http\Controllers\Admin\MailAccountController::class, 'store'])->name('mail.accounts.store');
     Route::put('/mail-accounts/{account}', [\App\Http\Controllers\Admin\MailAccountController::class, 'update'])->name('mail.accounts.update');
     Route::post('/mail-accounts/{account}/test', [\App\Http\Controllers\Admin\MailAccountController::class, 'test'])->name('mail.accounts.test');
+    Route::post('/mail-accounts/{account}/history-import', [\App\Http\Controllers\Admin\MailAccountController::class, 'importHistory'])->name('mail.accounts.history-import');
     Route::get('/mail-drafts', [\App\Http\Controllers\Admin\MailboxController::class, 'drafts'])->name('mail.drafts');
     Route::post('/mail-drafts', [\App\Http\Controllers\Admin\MailboxController::class, 'saveDraft'])->name('mail.drafts.save');
     Route::delete('/mail-drafts/{draft}', [\App\Http\Controllers\Admin\MailboxController::class, 'destroyDraft'])->name('mail.drafts.destroy');

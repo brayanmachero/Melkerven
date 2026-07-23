@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 const initialData = (users) => ({
     address: '',
@@ -28,6 +29,8 @@ function status(account) {
 export default function Accounts({ accounts, users }) {
     const { flash = {} } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm(initialData(users));
+    const [editingAccountId, setEditingAccountId] = useState(null);
+    const [imapData, setImapData] = useState(null);
 
     const toggleMember = (userId) => {
         const selected = data.member_ids.includes(userId);
@@ -55,6 +58,52 @@ export default function Accounts({ accounts, users }) {
 
     const testAccount = (account) => {
         router.post(route('admin.mail.accounts.test', account.id), {}, { preserveScroll: true });
+    };
+
+    const startHistoryImport = (account) => {
+        router.post(route('admin.mail.accounts.history-import', account.id), {}, { preserveScroll: true });
+    };
+
+    const configureImap = (account) => {
+        setEditingAccountId(account.id);
+        setImapData({
+            address: account.address,
+            display_name: account.display_name || '',
+            incoming_source: 'imap',
+            incoming_host: account.incoming_host || 'imap.secureserver.net',
+            incoming_port: account.incoming_port || 993,
+            incoming_encryption: account.incoming_encryption || 'ssl',
+            incoming_validate_certificate: account.incoming_validate_certificate ?? true,
+            incoming_username: account.incoming_username || account.address,
+            incoming_password: '',
+            is_shared: account.is_shared,
+            is_active: account.is_active,
+            member_ids: account.users.map(user => user.id),
+            manager_ids: account.users.filter(user => user.pivot?.can_manage).map(user => user.id),
+        });
+    };
+
+    const updateImap = (account) => {
+        router.put(route('admin.mail.accounts.update', account.id), imapData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setEditingAccountId(null);
+                setImapData(null);
+            },
+        });
+    };
+
+    const switchToResend = (account) => {
+        router.put(route('admin.mail.accounts.update', account.id), {
+            address: account.address,
+            display_name: account.display_name || '',
+            incoming_source: 'resend',
+            incoming_validate_certificate: true,
+            is_shared: account.is_shared,
+            is_active: account.is_active,
+            member_ids: account.users.map(user => user.id),
+            manager_ids: account.users.filter(user => user.pivot?.can_manage).map(user => user.id),
+        }, { preserveScroll: true });
     };
 
     return (
@@ -169,7 +218,24 @@ export default function Accounts({ accounts, users }) {
                                 </div>
                                 <div className="mt-4 flex flex-wrap gap-2">{account.users.map(user => <span key={user.id} className="rounded-lg bg-white/[0.05] px-2.5 py-1.5 text-[10px] text-primary-300">{user.name}{user.pivot?.can_manage ? ' · responsable' : ''}</span>)}</div>
                                 {account.last_sync_error && <p className="mt-4 rounded-lg bg-red-500/[0.07] px-3 py-2 text-[10px] leading-relaxed text-red-200">La última conexión falló. Revisa el servidor y las credenciales antes de sincronizar.</p>}
-                                {account.provider !== 'resend' && <button onClick={() => testAccount(account)} className="mt-4 rounded-lg border border-accent-500/30 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-accent-300 transition hover:bg-accent-500/10">Probar conexión IMAP</button>}
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                    <button onClick={() => configureImap(account)} className="rounded-lg border border-white/15 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-primary-300 transition hover:border-accent-500/40 hover:text-accent-300">{account.provider === 'resend' ? 'Conectar histórico GoDaddy' : 'Editar conexión IMAP'}</button>
+                                    {account.provider !== 'resend' && <button onClick={() => testAccount(account)} className="rounded-lg border border-accent-500/30 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-accent-300 transition hover:bg-accent-500/10">Probar conexión</button>}
+                                    {account.provider !== 'resend' && <button onClick={() => startHistoryImport(account)} disabled={account.history_import_status === 'queued' || account.history_import_status === 'running'} className="rounded-lg bg-accent-500/15 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-accent-200 transition hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-50">{account.history_import_status === 'queued' || account.history_import_status === 'running' ? 'Migración en curso…' : 'Importar historial completo'}</button>}
+                                    {account.provider !== 'resend' && account.history_import_status === 'completed' && <button onClick={() => switchToResend(account)} className="rounded-lg border border-sky-500/30 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-sky-200 transition hover:bg-sky-500/10">Finalizar y usar Resend</button>}
+                                </div>
+                                {account.history_import_status && account.history_import_status !== 'idle' && <p className="mt-3 rounded-lg border border-white/10 bg-primary-950/50 px-3 py-2 text-[10px] leading-relaxed text-primary-300">Historial: <strong className="text-white">{account.history_import_status === 'completed' ? 'completado' : account.history_import_status === 'failed' ? 'requiere revisión' : 'en curso'}</strong> · {account.history_imported_messages || 0} mensajes · {account.history_imported_attachments || 0} adjuntos{account.history_import_error ? ` · ${account.history_import_error}` : ''}</p>}
+                                {editingAccountId === account.id && imapData && <div className="mt-4 space-y-3 rounded-xl border border-accent-500/25 bg-accent-500/[0.05] p-4">
+                                    <div><p className="text-[10px] font-bold uppercase tracking-widest text-accent-300">Migrar histórico desde GoDaddy</p><p className="mt-1 text-[10px] leading-relaxed text-primary-400">La contraseña se cifra al guardar y no se muestra después. Primero prueba la conexión; luego inicia la importación por lotes.</p></div>
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        <Field label="Servidor IMAP"><input value={imapData.incoming_host} onChange={event => setImapData({ ...imapData, incoming_host: event.target.value })} className={inputClass} /></Field>
+                                        <Field label="Puerto"><input value={imapData.incoming_port} onChange={event => setImapData({ ...imapData, incoming_port: Number(event.target.value) })} type="number" className={inputClass} /></Field>
+                                        <Field label="Usuario"><input value={imapData.incoming_username} onChange={event => setImapData({ ...imapData, incoming_username: event.target.value })} type="email" className={inputClass} /></Field>
+                                        <Field label="Contraseña GoDaddy"><input value={imapData.incoming_password} onChange={event => setImapData({ ...imapData, incoming_password: event.target.value })} type="password" autoComplete="new-password" className={inputClass} /></Field>
+                                    </div>
+                                    <label className="flex items-center gap-2 text-[10px] text-primary-300"><input type="checkbox" checked={imapData.incoming_validate_certificate} onChange={event => setImapData({ ...imapData, incoming_validate_certificate: event.target.checked })} className="rounded border-white/20 bg-primary-950 text-accent-500" /> Exigir certificado TLS válido</label>
+                                    <div className="flex flex-wrap gap-2"><button type="button" onClick={() => updateImap(account)} className="rounded-lg bg-accent-500 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-white">Guardar conexión segura</button><button type="button" onClick={() => { setEditingAccountId(null); setImapData(null); }} className="rounded-lg border border-white/15 px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-primary-300">Cancelar</button></div>
+                                </div>}
                             </article>;
                         })}
                     </section>

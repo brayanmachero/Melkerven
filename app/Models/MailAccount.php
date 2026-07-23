@@ -28,6 +28,15 @@ class MailAccount extends Model
         'is_active',
         'last_synced_at',
         'last_sync_error',
+        'history_import_status',
+        'history_import_folders',
+        'history_import_folder_index',
+        'history_import_page',
+        'history_imported_messages',
+        'history_imported_attachments',
+        'history_import_started_at',
+        'history_import_completed_at',
+        'history_import_error',
     ];
 
     protected function casts(): array
@@ -39,6 +48,9 @@ class MailAccount extends Model
             'is_shared' => 'boolean',
             'is_active' => 'boolean',
             'last_synced_at' => 'datetime',
+            'history_import_folders' => 'array',
+            'history_import_started_at' => 'datetime',
+            'history_import_completed_at' => 'datetime',
         ];
     }
 

@@ -14,6 +14,8 @@ class MailMessage extends Model
         'direction',
         'provider_id',
         'provider_message_id',
+        'source_folder',
+        'source_folder_type',
         'in_reply_to',
         'from_address',
         'from_name',

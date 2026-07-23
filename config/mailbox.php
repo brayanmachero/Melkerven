@@ -9,5 +9,6 @@ return [
         'initial_days' => (int) env('MAILBOX_INITIAL_SYNC_DAYS', 30),
         'max_messages_per_run' => (int) env('MAILBOX_MAX_MESSAGES_PER_SYNC', 250),
         'max_attachment_bytes' => (int) env('MAILBOX_MAX_ATTACHMENT_BYTES', 25 * 1024 * 1024),
+        'history_chunk_size' => (int) env('MAILBOX_HISTORY_CHUNK_SIZE', 100),
     ],
 ];

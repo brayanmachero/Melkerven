@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ImportMailboxHistory;
 use App\Models\MailAccount;
 use App\Models\User;
 use App\Services\MailboxImapClientFactory;
@@ -59,6 +60,14 @@ class MailAccountController extends Controller
     {
         $data = $this->validated($request);
 
+        if ($data['incoming_source'] === 'imap'
+            && blank($data['incoming_password'] ?? null)
+            && ! $account->hasIncomingConfiguration()) {
+            throw ValidationException::withMessages([
+                'incoming_password' => 'Ingresa la contraseña IMAP para conectar este buzón por primera vez.',
+            ]);
+        }
+
         DB::transaction(function () use ($account, $data): void {
             $account->update($this->accountAttributes($data, keepingExistingPassword: true));
             $this->syncMembers($account, $data);
@@ -84,6 +93,33 @@ class MailAccountController extends Controller
 
             return back()->with('error', 'No fue posible conectar por IMAP. Revisa el servidor, TLS y las credenciales.');
         }
+    }
+
+    public function importHistory(MailAccount $account): RedirectResponse
+    {
+        if (! $account->usesImap()) {
+            return back()->with('error', 'Primero configura la conexión IMAP de este buzón.');
+        }
+
+        if ($account->history_import_status === 'running') {
+            return back()->with('success', 'La migración histórica ya está en curso.');
+        }
+
+        $account->update([
+            'history_import_status' => 'queued',
+            'history_import_folders' => null,
+            'history_import_folder_index' => 0,
+            'history_import_page' => 1,
+            'history_imported_messages' => 0,
+            'history_imported_attachments' => 0,
+            'history_import_started_at' => null,
+            'history_import_completed_at' => null,
+            'history_import_error' => null,
+        ]);
+
+        ImportMailboxHistory::dispatch($account->id);
+
+        return back()->with('success', 'Migración histórica puesta en cola. Se copiarán las carpetas y adjuntos por lotes sin modificar GoDaddy.');
     }
 
     /** @return array<string, mixed> */

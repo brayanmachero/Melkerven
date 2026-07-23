@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Jobs\ImportMailboxHistory;
 use App\Models\MailAccount;
 use App\Models\MailThread;
 use App\Models\User;
@@ -9,6 +10,7 @@ use App\Services\MailboxAccess;
 use App\Services\MailboxImapClientFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class MailAccountTest extends TestCase
@@ -149,5 +151,38 @@ class MailAccountTest extends TestCase
         $this->assertTrue($account->receivesThroughResend());
         $this->assertFalse($account->usesImap());
         $this->assertCount(2, $account->users);
+    }
+
+    public function test_an_imap_mailbox_history_import_is_queued_in_resumable_pages(): void
+    {
+        Queue::fake();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $account = MailAccount::create([
+            'address' => 'archivo@melkerven.test',
+            'provider' => 'imap',
+            'incoming_host' => 'imap.secureserver.net',
+            'incoming_port' => 993,
+            'incoming_encryption' => 'ssl',
+            'incoming_username' => 'archivo@melkerven.test',
+            'incoming_password' => 'encrypted-password',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.mail.accounts.history-import', $account))
+            ->assertRedirect();
+
+        $this->assertSame('queued', $account->fresh()->history_import_status);
+        Queue::assertPushed(ImportMailboxHistory::class, fn (ImportMailboxHistory $job) => $job->mailAccountId === $account->id);
+    }
+
+    public function test_history_folder_classification_prioritizes_inbox_and_sent_mail(): void
+    {
+        $sync = app(\App\Services\MailboxImapSynchronizer::class);
+
+        $this->assertSame('inbox', $sync->folderType('INBOX'));
+        $this->assertSame('sent', $sync->folderType('Enviados'));
+        $this->assertSame('draft', $sync->folderType('Drafts'));
+        $this->assertSame('trash', $sync->folderType('Papelera'));
     }
 }
