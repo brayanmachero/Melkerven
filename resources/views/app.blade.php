@@ -10,13 +10,20 @@
     <title inertia>{{ config('app.name', 'Melkerven') }}</title>
     <meta name="description" content="Melkerven - Servers, Networking & Storage Hardware. Infraestructura tecnológica de alto nivel para las Américas.">
 
+    <!-- Site icons -->
+    <link rel="icon" href="/favicon/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+    <meta name="msapplication-TileColor" content="#102536">
+
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0ea5e9">
+    <meta name="theme-color" content="#102536">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Melkerven Mail">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="/images/logo-light.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

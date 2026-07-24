@@ -35,7 +35,7 @@ export default function Wishlist({ auth, wishlistItems }) {
                                     >
                                         ✕
                                     </button>
-                                    <Link href={route('catalog.show', item.product.slug)}>
+                                    <Link href={route('product.show', item.product.slug)}>
                                         {item.product.image_url ? (
                                             <img src={item.product.image_url} alt={item.product.name} className="w-full h-48 object-cover rounded-lg mb-4" loading="lazy" />
                                         ) : (
