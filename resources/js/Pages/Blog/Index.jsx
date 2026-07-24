@@ -3,7 +3,7 @@ import Breadcrumbs from '@/Components/Breadcrumbs';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
-const categories = ['noticias', 'guias', 'tecnologia', 'industria'];
+const categories = ['guias', 'redes', 'almacenamiento', 'continuidad', 'operacion'];
 
 export default function BlogIndex({ auth, posts, filters }) {
     const [search, setSearch] = useState(filters.search || '');

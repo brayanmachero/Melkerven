@@ -181,6 +181,27 @@
     to { stroke-dashoffset: 0; }
 }
 
+@keyframes publicNetworkDrift {
+    from {
+        background-position: 0 0, 0 0, 0 0, 0 0;
+    }
+    to {
+        background-position: 76px -76px, -104px 104px, 190px -190px, -240px 240px;
+    }
+}
+
+@keyframes publicNetworkSignal {
+    0%, 12% { opacity: 0; transform: translate3d(-18%, 22%, 0) rotate(-18deg); }
+    28% { opacity: .7; }
+    64% { opacity: .18; }
+    100% { opacity: 0; transform: translate3d(18%, -22%, 0) rotate(-18deg); }
+}
+
+@keyframes publicNetworkNodes {
+    0%, 100% { opacity: .15; transform: translate3d(0, 0, 0); }
+    50% { opacity: .5; transform: translate3d(14px, -10px, 0); }
+}
+
 .public-network {
     background-image:
         radial-gradient(circle at 18% 22%, rgba(87, 140, 163, .35) 0 1px, transparent 1.5px),
@@ -188,6 +209,28 @@
         linear-gradient(115deg, transparent 0 48%, rgba(87, 140, 163, .09) 48.2% 48.45%, transparent 48.7% 100%),
         linear-gradient(30deg, transparent 0 66%, rgba(87, 140, 163, .07) 66.2% 66.4%, transparent 66.6% 100%);
     background-size: 76px 76px, 104px 104px, 190px 190px, 240px 240px;
+    animation: publicNetworkDrift 34s linear infinite;
+}
+
+.public-network::before,
+.public-network::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: -24%;
+}
+
+.public-network::before {
+    background: linear-gradient(108deg, transparent 44%, rgba(126, 202, 226, .12) 48%, rgba(255, 255, 255, .45) 50%, rgba(126, 202, 226, .12) 52%, transparent 56%);
+    animation: publicNetworkSignal 10s cubic-bezier(.45, 0, .55, 1) infinite;
+}
+
+.public-network::after {
+    background-image:
+        radial-gradient(circle at 24% 42%, rgba(77, 151, 180, .75) 0 2px, transparent 3px),
+        radial-gradient(circle at 68% 38%, rgba(77, 151, 180, .55) 0 1.5px, transparent 2.5px),
+        radial-gradient(circle at 78% 76%, rgba(77, 151, 180, .45) 0 1.5px, transparent 2.5px);
+    animation: publicNetworkNodes 7s ease-in-out infinite;
 }
 
 .public-grid {
@@ -195,6 +238,31 @@
         linear-gradient(rgba(87, 140, 163, .10) 1px, transparent 1px),
         linear-gradient(90deg, rgba(87, 140, 163, .10) 1px, transparent 1px);
     background-size: 48px 48px;
+}
+
+.blog-content h2 {
+    @apply mt-10 text-2xl font-semibold tracking-[-0.04em] text-ink-950;
+}
+
+.blog-content h2:first-child {
+    @apply mt-0;
+}
+
+.blog-content p {
+    @apply mt-4 text-base leading-8 text-ink-700;
+}
+
+.blog-content ul {
+    @apply mt-5 space-y-3 rounded-2xl border border-signal-100 bg-signal-50/60 p-5 text-ink-700;
+}
+
+.blog-content li {
+    @apply relative pl-5 text-sm leading-6;
+}
+
+.blog-content li::before {
+    content: '';
+    @apply absolute left-0 top-2.5 size-1.5 rounded-full bg-signal-500;
 }
 
 .network-pulse {

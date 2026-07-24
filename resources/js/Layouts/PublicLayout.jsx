@@ -2,7 +2,7 @@ import { Link, usePage, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { useCurrency } from '../Contexts/CurrencyContext';
 import { useLanguage } from '../Contexts/LanguageContext';
-import BrandMark from '../Components/BrandMark';
+import BrandLogo from '../Components/BrandLogo';
 
 function NewsletterForm() {
     const { data, setData, post, processing, reset } = useForm({ email: '' });
@@ -108,12 +108,8 @@ export default function PublicLayout({ children, auth }) {
                 <nav className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex h-[4.5rem] items-center justify-between gap-4">
                         <div className="flex items-center">
-                            <Link href="/" className="flex items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-500">
-                                <BrandMark />
-                                <span className="flex min-w-0 flex-col leading-none">
-                                    <span className="font-display text-lg font-semibold tracking-[-0.06em] text-ink-950 sm:text-xl">MELKERVEN<span className="text-signal-500">.</span></span>
-                                    <span className="mt-1 hidden text-[8px] font-bold tracking-[0.19em] text-ink-500 sm:block">INFRAESTRUCTURA TI</span>
-                                </span>
+                            <Link href="/" className="rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-500">
+                                <BrandLogo className="h-11 w-[10.5rem] sm:w-[11.5rem]" />
                             </Link>
                         </div>
 
@@ -250,23 +246,22 @@ export default function PublicLayout({ children, auth }) {
             </main>
 
             {/* Footer */}
-            <footer className="relative overflow-hidden border-t border-ink-800 bg-ink-950 py-20 text-cloud-300">
+            <footer id="site-footer" className="relative overflow-hidden border-t border-ink-800 bg-ink-950 py-10 text-cloud-300">
                 <div className="pointer-events-none absolute inset-0 public-network opacity-25" />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="relative grid grid-cols-1 gap-14 md:grid-cols-4">
-                        <div className="col-span-1 md:col-span-2">
-                            <Link href="/" className="mb-7 flex items-center gap-3">
-                                <BrandMark className="size-9" />
-                                <span className="font-display text-xl font-semibold tracking-[-0.06em] text-white">MELKERVEN<span className="text-signal-300">.</span></span>
+                    <div className="relative grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1.15fr)_0.6fr_0.8fr]">
+                        <div>
+                            <Link href="/" className="mb-4 inline-block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-300">
+                                <BrandLogo variant="light" className="h-9 w-40" />
                             </Link>
-                            <p className="max-w-sm text-sm leading-relaxed text-cloud-300 font-light">
+                            <p className="max-w-md text-sm leading-6 text-cloud-300 font-light">
                                 Infraestructura tecnológica de alto nivel. Suministramos piezas críticas y equipos TI importados con estándares industriales.
                             </p>
-                            <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.18em] text-cloud-500">Servers · Storage · Networking · Repuestos críticos</p>
+                            <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.16em] text-cloud-500">Servers · Storage · Networking · Repuestos críticos</p>
                         </div>
                         <div>
-                            <h4 className="text-white font-bold mb-8 uppercase tracking-widest text-xs">{t('footer.nav')}</h4>
-                            <ul className="space-y-4 text-sm font-medium">
+                            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs">{t('footer.nav')}</h4>
+                            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm font-medium md:grid-cols-1">
                                 <li><Link href="/" className="hover:text-signal-300 transition">{t('nav.home')}</Link></li>
                                 <li><Link href="/catalog" className="hover:text-signal-300 transition">{t('nav.catalog')}</Link></li>
                                 <li><Link href="/about" className="hover:text-signal-300 transition">{t('nav.about')}</Link></li>
@@ -277,9 +272,9 @@ export default function PublicLayout({ children, auth }) {
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-white font-bold mb-8 uppercase tracking-widest text-xs">{t('footer.hq')}</h4>
-                            <p className="text-sm mb-2 text-cloud-200">Badajoz 100, Las Condes</p>
-                            <p className="text-sm mb-6 text-cloud-200">Santiago, Chile</p>
+                            <h4 className="text-white font-bold mb-4 uppercase tracking-widest text-xs">{t('footer.hq')}</h4>
+                            <p className="text-sm mb-1 text-cloud-200">Badajoz 100, Las Condes</p>
+                            <p className="text-sm mb-4 text-cloud-200">Santiago, Chile</p>
                             <a href="https://wa.me/56988198559" className="inline-flex items-center gap-2 text-signal-300 font-bold hover:text-signal-200 transition">
                                 <span className="size-2 bg-signal-300 rounded-full animate-pulse"></span>
                                 {t('footer.support')}
@@ -288,15 +283,17 @@ export default function PublicLayout({ children, auth }) {
                     </div>
 
                     {/* Newsletter */}
-                    <div className="relative mt-16 border-t border-white/10 pt-8">
-                        <div className="max-w-xl mx-auto text-center">
-                            <h4 className="text-white font-display font-medium text-lg mb-2">{t('footer.newsletter')}</h4>
-                            <p className="text-cloud-300 text-sm mb-4">{t('footer.newsletterDesc')}</p>
+                    <div className="relative mt-8 grid gap-4 border-t border-white/10 pt-6 md:grid-cols-[1fr_minmax(22rem,0.9fr)] md:items-center md:gap-8">
+                        <div className="md:text-left">
+                            <h4 className="text-white font-display font-medium text-base">{t('footer.newsletter')}</h4>
+                            <p className="mt-1 text-cloud-300 text-sm">{t('footer.newsletterDesc')}</p>
+                        </div>
+                        <div>
                             <NewsletterForm />
                         </div>
                     </div>
-                    <div className="relative mt-16 border-t border-white/10 pt-8 text-center text-[10px] font-bold uppercase tracking-widest text-cloud-500">
-                        © {new Date().getFullYear()} Melkerven Chile <span className="mx-2">•</span> Infraestructura Tecnológica de Alto Nivel
+                    <div className="relative mt-6 border-t border-white/10 pt-5 text-center text-[10px] font-bold uppercase tracking-widest text-cloud-500">
+                        © {new Date().getFullYear()} Melkerven Chile. Todos los derechos reservados.
                     </div>
                 </div>
             </footer>

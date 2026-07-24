@@ -65,6 +65,10 @@ export default function Catalog({ auth, products, categories, filters, wishlistI
                         <p className="mt-6 text-lg leading-8 text-ink-600">
                             Una base técnica para comenzar una conversación útil. Cada ficha se cotiza según configuración, compatibilidad, licencias y disponibilidad real.
                         </p>
+                        <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-signal-200 bg-white/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-signal-700 shadow-sm">
+                            <span className="size-1.5 rounded-full bg-signal-500 network-pulse" />
+                            {products.total} referencias técnicas para cotizar
+                        </p>
                     </div>
 
                     <div className="mb-8 rounded-2xl border border-signal-200 bg-white/80 p-4 text-sm leading-6 text-ink-600 shadow-[0_14px_32px_rgba(31,62,82,0.07)] backdrop-blur-sm sm:flex sm:items-center sm:gap-4">
@@ -116,6 +120,7 @@ export default function Catalog({ auth, products, categories, filters, wishlistI
                                     <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-2xl border border-signal-100 bg-[linear-gradient(135deg,#f7fafc,#eaf4f7)]">
                                         {product.image_url ? <img src={product.image_url} alt={product.name} loading="lazy" className="size-full object-cover transition duration-700 group-hover:scale-105" /> : <ProductGlyph categoryName={product.category?.name || ''} className="h-[75%] w-[75%] transition duration-700 group-hover:scale-105" />}
                                         <span className="absolute right-3 top-3 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-signal-700 shadow-sm">{product.category?.name || 'OEM'}</span>
+                                        {product.image_url && <span className="absolute bottom-3 left-3 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[8px] font-bold uppercase tracking-wider text-ink-500 shadow-sm">Imagen referencial</span>}
                                         <button type="button" onClick={() => toggleCompare(product.id)} aria-label={`Añadir ${product.name} a comparación`} className={`absolute left-3 top-3 flex size-8 items-center justify-center rounded-lg border transition ${compareIds.includes(product.id) ? 'border-ink-950 bg-ink-950 text-white' : 'border-ink-200 bg-white/90 text-ink-500 hover:border-signal-400 hover:text-signal-700'}`}>
                                             <svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2Zm0 0V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v10m-6 0a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2m0 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2Z" /></svg>
                                         </button>
