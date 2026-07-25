@@ -51,7 +51,7 @@
     @inertia
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js?v=3');
+            navigator.serviceWorker.register('/service-worker.js?v=4');
         }
     </script>
 </body>

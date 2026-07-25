@@ -1,7 +1,8 @@
-const CACHE_NAME = 'melkerven-public-shell-v3';
+const CACHE_NAME = 'melkerven-public-shell-v4';
 const PUBLIC_ASSETS = [
     '/offline.html',
     '/manifest.json',
+    '/site-manifest.json',
     '/favicon/favicon-32x32.png',
 ];
 
