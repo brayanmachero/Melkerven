@@ -19,7 +19,7 @@
     <meta name="msapplication-TileColor" content="#102536">
 
     <!-- PWA -->
-    <link rel="manifest" href="{{ request()->is('admin/*') ? '/manifest.json' : '/site.webmanifest' }}">
+    <link rel="manifest" href="{{ request()->is('admin/*') ? '/manifest.json' : '/site-manifest.json' }}">
     <meta name="theme-color" content="#102536">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="{{ request()->is('admin/*') ? 'Melkerven Mail' : 'Melkerven' }}">
