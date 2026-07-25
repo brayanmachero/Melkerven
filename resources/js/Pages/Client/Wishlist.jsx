@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ProductImage from '@/Components/ProductImage';
 import { Head, Link, router } from '@inertiajs/react';
 
 export default function Wishlist({ auth, wishlistItems }) {
@@ -37,7 +38,7 @@ export default function Wishlist({ auth, wishlistItems }) {
                                     </button>
                                     <Link href={route('product.show', item.product.slug)}>
                                         {item.product.image_url ? (
-                                            <img src={item.product.image_url} alt={item.product.name} className="w-full h-48 object-cover rounded-lg mb-4" loading="lazy" />
+                                            <ProductImage src={item.product.image_url} alt={item.product.name} sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1279px) calc(50vw - 3rem), 25vw" className="mb-4 h-48 w-full rounded-lg object-cover" />
                                         ) : (
                                             <div className="w-full h-48 bg-primary-800 rounded-lg mb-4 flex items-center justify-center text-primary-500">Sin imagen</div>
                                         )}

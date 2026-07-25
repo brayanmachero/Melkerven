@@ -1,6 +1,7 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import ProductGlyph from '@/Components/ProductGlyph';
+import ProductImage from '@/Components/ProductImage';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 
@@ -118,7 +119,7 @@ export default function Catalog({ auth, products, categories, filters, wishlistI
                             return (
                                 <article key={product.id} className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white p-5 shadow-[0_14px_36px_rgba(31,62,82,0.07)] transition duration-500 hover:-translate-y-1 hover:border-signal-300 hover:shadow-[0_24px_52px_rgba(31,62,82,0.12)]">
                                     <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-2xl border border-signal-100 bg-[linear-gradient(135deg,#f7fafc,#eaf4f7)]">
-                                        {product.image_url ? <img src={product.image_url} alt={product.name} loading="lazy" className="size-full object-cover transition duration-700 group-hover:scale-105" /> : <ProductGlyph categoryName={product.category?.name || ''} className="h-[75%] w-[75%] transition duration-700 group-hover:scale-105" />}
+                                        {product.image_url ? <ProductImage src={product.image_url} alt={product.name} sizes="(max-width: 639px) calc(100vw - 2.5rem), (max-width: 1279px) calc(50vw - 2.5rem), 31vw" className="size-full object-cover transition duration-700 group-hover:scale-105" /> : <ProductGlyph categoryName={product.category?.name || ''} className="h-[75%] w-[75%] transition duration-700 group-hover:scale-105" />}
                                         <span className="absolute right-3 top-3 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-signal-700 shadow-sm">{product.category?.name || 'OEM'}</span>
                                         {product.image_url && <span className="absolute bottom-3 left-3 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[8px] font-bold uppercase tracking-wider text-ink-500 shadow-sm">Imagen referencial</span>}
                                         <button type="button" onClick={() => toggleCompare(product.id)} aria-label={`Añadir ${product.name} a comparación`} className={`absolute left-3 top-3 flex size-8 items-center justify-center rounded-lg border transition ${compareIds.includes(product.id) ? 'border-ink-950 bg-ink-950 text-white' : 'border-ink-200 bg-white/90 text-ink-500 hover:border-signal-400 hover:text-signal-700'}`}>
