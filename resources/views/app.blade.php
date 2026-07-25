@@ -19,10 +19,10 @@
     <meta name="msapplication-TileColor" content="#102536">
 
     <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="{{ request()->is('admin/*') ? '/manifest.json' : '/site.webmanifest' }}">
     <meta name="theme-color" content="#102536">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Melkerven Mail">
+    <meta name="apple-mobile-web-app-title" content="{{ request()->is('admin/*') ? 'Melkerven Mail' : 'Melkerven' }}">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
@@ -51,7 +51,7 @@
     @inertia
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js');
+            navigator.serviceWorker.register('/service-worker.js?v=3');
         }
     </script>
 </body>

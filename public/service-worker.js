@@ -1,8 +1,8 @@
-const CACHE_NAME = 'melkerven-public-shell-v2';
+const CACHE_NAME = 'melkerven-public-shell-v3';
 const PUBLIC_ASSETS = [
     '/offline.html',
     '/manifest.json',
-    '/images/logo-light.png',
+    '/favicon/favicon-32x32.png',
 ];
 
 self.addEventListener('install', (event) => {
