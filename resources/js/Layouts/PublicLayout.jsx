@@ -21,19 +21,19 @@ function NewsletterForm() {
     }
 
     return (
-        <form onSubmit={submit} className="flex gap-2 max-w-md mx-auto">
+        <form onSubmit={submit} className="flex w-full max-w-md gap-2 mx-auto">
             <input
                 type="email"
                 value={data.email}
                 onChange={(e) => setData('email', e.target.value)}
                 placeholder="Tu correo electrónico"
                 required
-                className="flex-1 rounded-lg border border-white/15 bg-white/10 px-4 py-2.5 text-white text-sm placeholder:text-cloud-300 focus:border-signal-300 focus:outline-none"
+                className="min-w-0 flex-1 rounded-lg border border-white/15 bg-white/10 px-4 py-2.5 text-white text-sm placeholder:text-cloud-300 focus:border-signal-300 focus:outline-none"
             />
             <button
                 type="submit"
                 disabled={processing}
-                className="px-5 py-2.5 bg-signal-400 hover:bg-signal-300 text-ink-950 rounded-lg text-sm font-bold transition disabled:opacity-50"
+                className="shrink-0 px-5 py-2.5 bg-signal-400 hover:bg-signal-300 text-ink-950 rounded-lg text-sm font-bold transition disabled:opacity-50"
             >
                 Suscribir
             </button>
@@ -288,7 +288,7 @@ export default function PublicLayout({ children, auth }) {
                             <h4 className="text-white font-display font-medium text-base">{t('footer.newsletter')}</h4>
                             <p className="mt-1 text-cloud-300 text-sm">{t('footer.newsletterDesc')}</p>
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             <NewsletterForm />
                         </div>
                     </div>
