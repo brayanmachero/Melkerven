@@ -20,6 +20,11 @@ class BlogPost extends Model
 
     protected $appends = ['image_url'];
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     public function getImageUrlAttribute()
     {
         if (! $this->image_path) {

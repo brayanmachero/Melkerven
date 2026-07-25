@@ -1,4 +1,4 @@
-const CACHE_NAME = 'melkerven-public-shell-v4';
+const CACHE_NAME = 'melkerven-public-shell-v5';
 const PUBLIC_ASSETS = [
     '/offline.html',
     '/manifest.json',
