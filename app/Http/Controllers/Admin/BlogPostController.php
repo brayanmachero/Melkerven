@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
+use App\Traits\OptimizesImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class BlogPostController extends Controller
 {
+    use OptimizesImages;
+
     public function index()
     {
         return Inertia::render('Admin/Blog/Index', [
@@ -39,7 +41,7 @@ class BlogPostController extends Controller
         $validated['user_id'] = auth()->id();
 
         if ($request->hasFile('image')) {
-            $validated['image_path'] = $request->file('image')->store('blog', 'public');
+            $validated['image_path'] = $this->optimizeAndStore($request->file('image'), 'blog', 1600, 82);
         }
 
         if ($request->boolean('is_published')) {
@@ -71,10 +73,8 @@ class BlogPostController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            if ($post->image_path) {
-                Storage::disk('public')->delete($post->image_path);
-            }
-            $validated['image_path'] = $request->file('image')->store('blog', 'public');
+            $this->deleteOptimizedImage($post->image_path);
+            $validated['image_path'] = $this->optimizeAndStore($request->file('image'), 'blog', 1600, 82);
         }
 
         if ($request->boolean('is_published') && !$post->published_at) {
@@ -89,9 +89,7 @@ class BlogPostController extends Controller
 
     public function destroy(BlogPost $post)
     {
-        if ($post->image_path) {
-            Storage::disk('public')->delete($post->image_path);
-        }
+        $this->deleteOptimizedImage($post->image_path);
         $post->delete();
         return redirect()->back()->with('success', 'Artículo eliminado.');
     }

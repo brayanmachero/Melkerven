@@ -45,4 +45,21 @@ trait OptimizesImages
             return $file->store($directory, 'public');
         }
     }
+
+    /**
+     * Remove an optimized original and its companion thumbnail without touching
+     * remote URLs or seeded images served directly from the public directory.
+     */
+    protected function deleteOptimizedImage(?string $path): void
+    {
+        if (! $path || Str::startsWith($path, ['http://', 'https://', 'images/'])) {
+            return;
+        }
+
+        Storage::disk('public')->delete($path);
+
+        if (Str::endsWith($path, '.webp')) {
+            Storage::disk('public')->delete(dirname($path) . '/thumbs/' . basename($path));
+        }
+    }
 }

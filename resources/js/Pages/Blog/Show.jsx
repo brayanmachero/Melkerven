@@ -1,5 +1,6 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 import Breadcrumbs from '@/Components/Breadcrumbs';
+import ProductImage from '@/Components/ProductImage';
 import { Head, Link } from '@inertiajs/react';
 
 export default function BlogShow({ auth, post, relatedPosts }) {
@@ -38,7 +39,7 @@ export default function BlogShow({ auth, post, relatedPosts }) {
                             </div>
                         </header>
 
-                        {post.image_url && <figure className="relative mt-10 overflow-hidden rounded-3xl border border-white/80 bg-white p-2 shadow-[0_24px_60px_rgba(31,62,82,.12)]"><img src={post.image_url} alt="Imagen referencial para el artículo" className="aspect-[16/8] w-full rounded-[1.25rem] object-cover" loading="eager" /><figcaption className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-widest text-ink-400">Imagen referencial</figcaption></figure>}
+                        {post.image_url && <figure className="relative mt-10 overflow-hidden rounded-3xl border border-white/80 bg-white p-2 shadow-[0_24px_60px_rgba(31,62,82,.12)]"><ProductImage src={post.image_url} alt="Imagen referencial para el artículo" className="aspect-[16/8] w-full rounded-[1.25rem] object-cover" priority sizes="(max-width: 767px) calc(100vw - 3rem), 768px" /><figcaption className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-widest text-ink-400">Imagen referencial</figcaption></figure>}
 
                         <div className="mt-10 rounded-3xl border border-ink-100 bg-white p-6 shadow-[0_16px_40px_rgba(31,62,82,.08)] sm:p-10">
                             <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
@@ -47,7 +48,7 @@ export default function BlogShow({ auth, post, relatedPosts }) {
                         {post.tags?.length > 0 && <div className="mt-7 flex flex-wrap gap-2">{post.tags.map((tag) => <span key={tag} className="rounded-full border border-ink-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-500">{tag}</span>)}</div>}
                     </article>
 
-                    {relatedPosts?.length > 0 && <section className="mx-auto mt-16 max-w-5xl border-t border-ink-200 pt-12"><div className="flex items-end justify-between gap-4"><div><p className="public-eyebrow">Centro de recursos</p><h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-ink-950">Siga explorando</h2></div><Link href={route('blog.index')} className="text-[10px] font-bold uppercase tracking-widest text-signal-700 hover:text-signal-500">Ver todos</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-3">{relatedPosts.map((related) => <Link key={related.id} href={route('blog.show', related.slug)} className="group overflow-hidden rounded-2xl border border-ink-100 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:border-signal-300"><div className="overflow-hidden rounded-xl bg-cloud-50">{related.image_url ? <img src={related.image_url} alt="" className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" /> : <div className="aspect-[16/9]" />}</div><p className="mt-4 text-[9px] font-bold uppercase tracking-widest text-signal-700 capitalize">{related.category}</p><h3 className="mt-2 line-clamp-2 text-base font-semibold leading-tight text-ink-950 transition group-hover:text-signal-700">{related.title}</h3></Link>)}</div></section>}
+                    {relatedPosts?.length > 0 && <section className="mx-auto mt-16 max-w-5xl border-t border-ink-200 pt-12"><div className="flex items-end justify-between gap-4"><div><p className="public-eyebrow">Centro de recursos</p><h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-ink-950">Siga explorando</h2></div><Link href={route('blog.index')} className="text-[10px] font-bold uppercase tracking-widest text-signal-700 hover:text-signal-500">Ver todos</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-3">{relatedPosts.map((related) => <Link key={related.id} href={route('blog.show', related.slug)} className="group overflow-hidden rounded-2xl border border-ink-100 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:border-signal-300"><div className="overflow-hidden rounded-xl bg-cloud-50">{related.image_url ? <ProductImage src={related.image_url} alt="" className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-105" sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) calc(50vw - 3rem), 33vw" /> : <div className="aspect-[16/9]" />}</div><p className="mt-4 text-[9px] font-bold uppercase tracking-widest text-signal-700 capitalize">{related.category}</p><h3 className="mt-2 line-clamp-2 text-base font-semibold leading-tight text-ink-950 transition group-hover:text-signal-700">{related.title}</h3></Link>)}</div></section>}
                 </div>
             </section>
         </PublicLayout>
